@@ -7,7 +7,7 @@ test() ->
     {ok, cross} = test_cross(),
     {ok, squares} = test_squares(),
     {ok, unitlist} = test_unitlist(),
-    ok.
+    {ok, sudoku}.
 
 test_cross() ->
     ["A1","A2","B1","B2"] = cross("AB", "12"),
