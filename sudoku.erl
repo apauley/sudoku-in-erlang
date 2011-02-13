@@ -1,4 +1,5 @@
 -module(sudoku).
+-import(lists, [all/2, member/2]).
 -compile(export_all).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -27,6 +28,9 @@ test_unitlist() ->
 
 test_units() ->
     [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
+    TruthValues = [all(fun(Unit) -> member(Square, Unit) end,
+                       units(Square)) || Square <- squares()],
+    true = all(fun(B) -> B end, TruthValues),
     {ok, units}.
 
 cross(SeqA, SeqB) ->
@@ -61,4 +65,4 @@ unitlist() ->
 
 units(Square) ->
     %% A list of units for a specific square
-    [S || S <- unitlist(), lists:member(Square, S)].
+    [S || S <- unitlist(), member(Square, S)].
