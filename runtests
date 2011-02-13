@@ -1,5 +1,5 @@
 #!/usr/bin/env escript
 
 main(_) ->
-    {ok, sudoku} = sudoku:test(),
+    {ok, sudoku} = unittests:test(),
     io:format("All tests passed :-)~n").
