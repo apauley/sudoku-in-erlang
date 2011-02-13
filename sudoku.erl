@@ -7,6 +7,7 @@ test() ->
     {ok, cross} = test_cross(),
     {ok, squares} = test_squares(),
     {ok, unitlist} = test_unitlist(),
+    {ok, units} = test_units(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -23,6 +24,10 @@ test_unitlist() ->
     [["A1","A2","A3","B1","B2","B3","C1","C2","C3"]|_] = box_squares(),
     27 = length(unitlist()),
     {ok, unitlist}.
+
+test_units() ->
+    [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
+    {ok, units}.
 
 cross(SeqA, SeqB) ->
     %% Cross product of elements in SeqA and elements in SeqB.
@@ -53,3 +58,7 @@ box_squares() ->
 unitlist() ->
     %% A list of all units (columns, rows, boxes) in a grid.
     col_squares() ++ row_squares() ++ box_squares().
+
+units(Square) ->
+    %% A list of units for a specific square
+    [S || S <- unitlist(), lists:member(Square, S)].
