@@ -1,14 +1,28 @@
 -module(sudoku).
 -compile(export_all).
 
+%% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
+%% http://armstrongonsoftware.blogspot.com/2009/01/micro-lightweight-unit-testing.html
 test() ->
+    {ok, cross} = test_cross(),
+    {ok, squares} = test_squares(),
+    {ok, unitlist} = test_unitlist(),
+    ok.
+
+test_cross() ->
     ["A1","A2","B1","B2"] = cross("AB", "12"),
+    {ok, cross}.
+
+test_squares() ->
     81 = length(squares()),
+    {ok, squares}.
+
+test_unitlist() ->
     [["A1","B1","C1","D1","E1","F1","G1","H1","I1"]|_] = col_squares(),
     [["A1","A2","A3","A4","A5","A6","A7","A8","A9"]|_] = row_squares(),
     [["A1","A2","A3","B1","B2","B3","C1","C2","C3"]|_] = box_squares(),
     27 = length(unitlist()),
-    ok.
+    {ok, unitlist}.
 
 cross(SeqA, SeqB) ->
     %% Cross product of elements in SeqA and elements in SeqB.
