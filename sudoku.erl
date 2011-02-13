@@ -6,6 +6,7 @@ test() ->
     81 = length(squares()),
     [["A1","B1","C1","D1","E1","F1","G1","H1","I1"]|_] = col_squares(),
     [["A1","A2","A3","A4","A5","A6","A7","A8","A9"]|_] = row_squares(),
+    [["A1","A2","A3","B1","B2","B3","C1","C2","C3"]|_] = box_squares(),
     ok.
 
 cross(SeqA, SeqB) ->
@@ -26,3 +27,6 @@ col_squares() ->
     [cross(rows(), [C]) || C <- cols()].
 row_squares() ->
     [cross([R], cols()) || R <- rows()].
+box_squares() ->
+    [cross(Rows, Cols) || Rows <- ["ABC", "DEF", "GHI"],
+                          Cols <- ["123", "456", "789"]].
