@@ -36,15 +36,20 @@ cols() ->
     digits().
 
 squares() ->
+    %% Returns a list of 81 square names, including "A1" etc.
     cross(rows(), cols()).
 
 col_squares() ->
+    %% All the square names for each column.
     [cross(rows(), [C]) || C <- cols()].
 row_squares() ->
+    %% All the square names for each row.
     [cross([R], cols()) || R <- rows()].
 box_squares() ->
+    %% All the square names for each box.
     [cross(Rows, Cols) || Rows <- ["ABC", "DEF", "GHI"],
                           Cols <- ["123", "456", "789"]].
 
 unitlist() ->
+    %% A list of all units (columns, rows, boxes) in a grid.
     col_squares() ++ row_squares() ++ box_squares().
