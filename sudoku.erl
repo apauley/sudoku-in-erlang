@@ -9,6 +9,7 @@ test() ->
     {ok, squares} = test_squares(),
     {ok, unitlist} = test_unitlist(),
     {ok, units} = test_units(),
+    {ok, peers} = test_peers(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -42,8 +43,19 @@ test_units() ->
                        units(Square)) || Square <- squares()],
 
     true = allTrue(TruthValues),
-
     {ok, units}.
+
+test_peers() ->
+    Peers = lists:sort(["C8", "F2", "G2", "H2", "C7",
+                       "I2", "A3", "A1", "C9", "A2",
+                       "B1", "B2", "B3", "C3", "C1",
+                       "C4", "D2", "C6", "C5", "E2"]),
+    Peers = lists:sort(peers("C2")),
+
+    %% Each square should have exactly 20 squares as its peers
+    true = all(fun(Units) -> length(Units) == 20 end,
+               [peers(Square) || Square <- squares()]),
+    {ok, peers}.
 
 allTrue(Booleans) ->
     %% Test support function:
@@ -85,3 +97,16 @@ unitlist() ->
 units(Square) ->
     %% A list of units for a specific square
     [S || S <- unitlist(), member(Square, S)].
+
+peers(Square) ->
+    %% A unique list of squares (excluding this one)
+    %% that are also part of the units for this square.
+    NonUniquePeers = shallow_flatten([S || S <- units(Square)]),
+    PeerSet = sets:from_list(NonUniquePeers),
+    PeersWithSelf = sets:to_list(PeerSet),
+    lists:delete(Square, PeersWithSelf).
+
+shallow_flatten([]) -> [];
+shallow_flatten(List) ->
+    [H|T] = List,
+    H ++ shallow_flatten(T).
