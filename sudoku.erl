@@ -2,8 +2,9 @@
 -compile(export_all).
 
 test() ->
-    [] = cross('AB', '12'),
+    ["A1", "A2", "B1", "B2"] = cross("AB", "12"),
     ok.
 
-cross(A, B) ->
-    [].
+cross(SeqA, SeqB) ->
+    %% Cross product of elements in SeqA and elements in SeqB.
+    [[X,Y] || X <- SeqA, Y <- SeqB].
