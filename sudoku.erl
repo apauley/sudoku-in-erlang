@@ -30,8 +30,15 @@ test_units() ->
     [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
     TruthValues = [all(fun(Unit) -> member(Square, Unit) end,
                        units(Square)) || Square <- squares()],
-    true = all(fun(B) -> B end, TruthValues),
+    true = allTrue(TruthValues),
     {ok, units}.
+
+allTrue(Booleans) ->
+    %% Test support function:
+    %% Returns true if the list of booleans are all true.
+    %% I expect there should already be such a function,
+    %% please point me to it if you know.
+    all(fun(Bool) -> Bool end, Booleans).
 
 cross(SeqA, SeqB) ->
     %% Cross product of elements in SeqA and elements in SeqB.
