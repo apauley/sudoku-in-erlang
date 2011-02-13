@@ -28,16 +28,28 @@ test_unitlist() ->
 
 test_units() ->
     [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
+
+    %% Each square should have exactly 3 units
+    true = all(fun(Units) -> length(Units) == 3 end,
+               [units(Square) || Square <- squares()]),
+
+    %% Each unit should contain exactly nine squares
+    TruthValues = [all(fun(Unit) -> length(Unit) == 9 end,
+                       units(Square)) || Square <- squares()],
+
+    %% Each square should be part of all its units
     TruthValues = [all(fun(Unit) -> member(Square, Unit) end,
                        units(Square)) || Square <- squares()],
+
     true = allTrue(TruthValues),
+
     {ok, units}.
 
 allTrue(Booleans) ->
     %% Test support function:
     %% Returns true if the list of booleans are all true.
     %% I expect there should already be such a function,
-    %% please point me to it if you know.
+    %% please point me to it if you can.
     all(fun(Bool) -> Bool end, Booleans).
 
 cross(SeqA, SeqB) ->
