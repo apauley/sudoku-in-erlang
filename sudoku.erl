@@ -53,5 +53,12 @@ grid_values(GridString) ->
     %% Converts a string of values into a dictionary of values keyed on square name.
     %% Non-digits and "0" is allowed here, it indicates an unset square.
     81 = length(GridString),
-    Tuples =  lists:zipwith(fun(X, Y) -> {X, [Y]} end, squares(), GridString),
+    Tuples =  lists:zipwith(fun zipfun/2, squares(), GridString),
     dict:from_list(Tuples).
+
+zipfun(Square, Digit) ->
+    Digits = digits(),
+    case member(Digit, Digits) of
+	true -> {Square, [Digit]};
+	false -> {Square, Digits}
+    end.

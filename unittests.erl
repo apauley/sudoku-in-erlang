@@ -67,7 +67,7 @@ test_grid_values() ->
     GridValues = grid_values(GridString),
     81 = length(dict:fetch_keys(GridValues)),
     "4" = dict:fetch("A1", GridValues),
-    "." = dict:fetch("A2", GridValues),
+    "123456789" = dict:fetch("A2", GridValues),
     "8" = dict:fetch("A7", GridValues),
     "3" = dict:fetch("B2", GridValues),
     {ok, grid_values}.
