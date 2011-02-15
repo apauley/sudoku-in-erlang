@@ -59,8 +59,8 @@ grid_values(GridString) ->
 zipfun(Square, Digit) ->
     Digits = digits(),
     case member(Digit, Digits) of
-	true -> {Square, [Digit]};
-	false -> {Square, Digits}
+        true -> {Square, [Digit]};
+        false -> {Square, Digits}
     end.
 
 eliminate(ValuesDict, Square, DropDigits) ->
@@ -70,6 +70,7 @@ eliminate(ValuesDict, Square, DropDigits) ->
     dict:store(Square, NewValues, ValuesDict).
 
 assign(ValuesDict, Square, Digit) ->
-    %% assign should be implemented as the elimination of all values except for the assigned value.
+    %% This should be implemented as the elimination of all values,
+    %% except for the assigned value.
     %% For now, just assign the value directly.
     dict:store(Square, [Digit], ValuesDict).
