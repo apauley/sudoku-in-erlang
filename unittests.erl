@@ -64,12 +64,12 @@ test_peers() ->
 
 test_grid_values() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    GridValues = grid_values(GridString),
-    81 = length(dict:fetch_keys(GridValues)),
-    "4" = dict:fetch("A1", GridValues),
-    "123456789" = dict:fetch("A2", GridValues),
-    "8" = dict:fetch("A7", GridValues),
-    "3" = dict:fetch("B2", GridValues),
+    ValuesDict = grid_values(GridString),
+    81 = length(dict:fetch_keys(ValuesDict)),
+    "4" = dict:fetch("A1", ValuesDict),
+    "123456789" = dict:fetch("A2", ValuesDict),
+    "8" = dict:fetch("A7", ValuesDict),
+    "3" = dict:fetch("B2", ValuesDict),
     {ok, grid_values}.
 
 allTrue(Booleans) ->
