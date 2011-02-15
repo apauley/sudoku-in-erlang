@@ -50,6 +50,8 @@ shallow_flatten(List) ->
     H ++ shallow_flatten(T).
 
 grid_values(GridString) ->
+    %% Converts a string of values into a dictionary of values keyed on square name.
+    %% Non-digits and "0" is allowed here, it indicates an unset square.
     81 = length(GridString),
     Tuples =  lists:zipwith(fun(X, Y) -> {X, [Y]} end, squares(), GridString),
     dict:from_list(Tuples).

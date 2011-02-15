@@ -65,6 +65,7 @@ test_peers() ->
 test_grid_values() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
     GridValues = grid_values(GridString),
+    81 = length(dict:fetch_keys(GridValues)),
     "4" = dict:fetch("A1", GridValues),
     "." = dict:fetch("A2", GridValues),
     "8" = dict:fetch("A7", GridValues),
