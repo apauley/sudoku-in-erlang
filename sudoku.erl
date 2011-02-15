@@ -62,3 +62,7 @@ zipfun(Square, Digit) ->
 	true -> {Square, [Digit]};
 	false -> {Square, Digits}
     end.
+
+eliminate(ValuesDict, Square, Digit) ->
+    NewValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
+    dict:store(Square, NewValues, ValuesDict).
