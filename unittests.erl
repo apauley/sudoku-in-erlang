@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-		 grid_values/1, eliminate/3]).
+		 grid_values/1, eliminate/3, assign/3]).
 -export([test/0]).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -16,6 +16,7 @@ test() ->
     {ok, peers} = test_peers(),
     {ok, grid_values} = test_grid_values(),
     {ok, eliminate} = test_eliminate(),
+    {ok, assign} = test_assign(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -78,6 +79,12 @@ test_eliminate() ->
     ValuesDict = eliminate(grid_values(GridString), "A2", $3),
     "12456789" = dict:fetch("A2", ValuesDict),
     {ok, eliminate}.
+
+test_assign() ->
+    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    ValuesDict = assign(grid_values(GridString), "A2", $3),
+    "3" = dict:fetch("A2", ValuesDict),
+    {ok, assign}.
 
 allTrue(Booleans) ->
     %% Test support function:

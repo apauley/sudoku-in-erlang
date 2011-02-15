@@ -66,3 +66,8 @@ zipfun(Square, Digit) ->
 eliminate(ValuesDict, Square, Digit) ->
     NewValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
     dict:store(Square, NewValues, ValuesDict).
+
+assign(ValuesDict, Square, Digit) ->
+    %% assign should be implemented as the elimination of all values except for the assigned value.
+    %% For now, just assign the value directly.
+    dict:store(Square, [Digit], ValuesDict).
