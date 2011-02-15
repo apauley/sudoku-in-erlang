@@ -48,3 +48,8 @@ shallow_flatten([]) -> [];
 shallow_flatten(List) ->
     [H|T] = List,
     H ++ shallow_flatten(T).
+
+grid_values(GridString) ->
+    81 = length(GridString),
+    Tuples =  lists:zipwith(fun(X, Y) -> {X, [Y]} end, squares(), GridString),
+    dict:from_list(Tuples).

@@ -2,7 +2,8 @@
 -import(lists, [all/2, member/2]).
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
-                 unitlist/0, units/1, peers/1]).
+                 unitlist/0, units/1, peers/1,
+		 grid_values/1]).
 -export([test/0]).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -13,6 +14,7 @@ test() ->
     {ok, unitlist} = test_unitlist(),
     {ok, units} = test_units(),
     {ok, peers} = test_peers(),
+    {ok, grid_values} = test_grid_values(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -59,6 +61,15 @@ test_peers() ->
     true = all(fun(Units) -> length(Units) == 20 end,
                [peers(Square) || Square <- squares()]),
     {ok, peers}.
+
+test_grid_values() ->
+    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    GridValues = grid_values(GridString),
+    "4" = dict:fetch("A1", GridValues),
+    "." = dict:fetch("A2", GridValues),
+    "8" = dict:fetch("A7", GridValues),
+    "3" = dict:fetch("B2", GridValues),
+    {ok, grid_values}.
 
 allTrue(Booleans) ->
     %% Test support function:
