@@ -17,6 +17,7 @@ test() ->
     {ok, grid_values} = test_grid_values(),
     {ok, eliminate} = test_eliminate(),
     {ok, assign} = test_assign(),
+    {ok, assign_elimination} = test_assign_eliminates_from_peers(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -83,9 +84,18 @@ test_eliminate() ->
 
 test_assign() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    ValuesDict = assign(grid_values(GridString), "A2", $3),
-    "3" = dict:fetch("A2", ValuesDict),
+    ValuesDict = assign(grid_values(GridString), "A2", $1),
+    "1" = dict:fetch("A2", ValuesDict),
     {ok, assign}.
+
+test_assign_eliminates_from_peers() ->
+    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    ValuesDict = assign(grid_values(GridString), "A3", $7),
+
+    %% Now 7 may not be a possible value in any of A3's peers
+   Fun = fun(Square) -> not (member($7, dict:fetch(Square, ValuesDict))) end,
+   true = all(Fun, peers("A3")),
+    {ok, assign_elimination}.
 
 allTrue(Booleans) ->
     %% Test support function:
