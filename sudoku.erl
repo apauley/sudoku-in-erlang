@@ -70,7 +70,6 @@ eliminate(ValuesDict, Square, Digits) ->
     dict:store(Square, NewValues, ValuesDict).
 
 assign(ValuesDict, Square, Digit) ->
-    %% This should be implemented as the elimination of all values,
-    %% except for the assigned value.
-    %% For now, just assign the value directly.
-    dict:store(Square, [Digit], ValuesDict).
+    %% Assign by eliminating all values except the assigned value.
+    OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
+    eliminate(ValuesDict, Square, OtherValues).
