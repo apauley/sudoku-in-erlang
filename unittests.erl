@@ -76,8 +76,9 @@ test_grid_values() ->
 
 test_eliminate() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    ValuesDict = eliminate(grid_values(GridString), "A2", $3),
+    ValuesDict = eliminate(grid_values(GridString), "A2", "3"),
     "12456789" = dict:fetch("A2", ValuesDict),
+    "2457" = dict:fetch("A2", eliminate(ValuesDict, "A2", "13689")),
     {ok, eliminate}.
 
 test_assign() ->

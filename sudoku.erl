@@ -63,8 +63,10 @@ zipfun(Square, Digit) ->
 	false -> {Square, Digits}
     end.
 
-eliminate(ValuesDict, Square, Digit) ->
-    NewValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
+eliminate(ValuesDict, Square, DropDigits) ->
+    %% Eliminate all specified values for this square
+    OldValues = dict:fetch(Square, ValuesDict),
+    NewValues = lists:filter(fun(Elem) -> not member(Elem, DropDigits) end, OldValues),
     dict:store(Square, NewValues, ValuesDict).
 
 assign(ValuesDict, Square, Digit) ->
