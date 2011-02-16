@@ -67,23 +67,29 @@ eliminate(ValuesDict, Square, Digits) ->
     %% Eliminate all specified values for this square
     OldValues = dict:fetch(Square, ValuesDict),
     NewValues = lists:filter(fun(E) -> not member(E, Digits) end, OldValues),
+    NewDict = peer_eliminate(ValuesDict, Square, NewValues),
+    dict:store(Square, NewValues, NewDict).
+
+peer_eliminate(ValuesDict, Square, NewValues) ->
+    %% If there is only one value left, we can also
+    %% eliminate that value from the peers of Square
     case (length(NewValues) == 1) of
         true ->
             [AssignedValue|_] = NewValues,
-            NewDict = peer_eliminate(ValuesDict, AssignedValue, peers(Square));
-        false -> NewDict = ValuesDict
-    end,
-    dict:store(Square, NewValues, NewDict).
+            Peers = peers(Square),
+            eliminate_from_squares(ValuesDict, Peers, AssignedValue);
+        false -> ValuesDict
+    end.
 
-peer_eliminate(ValuesDict, _, []) ->
+eliminate_from_squares(ValuesDict, [], _) ->
     ValuesDict;
-peer_eliminate(ValuesDict, Digit, Peers) ->
+eliminate_from_squares(ValuesDict, Peers, Digit) ->
     %% Eliminate Digit from the peers of Square
     [H|T] = Peers,
     OldValues = dict:fetch(H, ValuesDict),
     NewValues = lists:delete(Digit, OldValues),
     NewDict = dict:store(H, NewValues, ValuesDict),
-    peer_eliminate(NewDict, Digit, T).
+    eliminate_from_squares(NewDict, T, Digit).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
