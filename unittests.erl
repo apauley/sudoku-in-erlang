@@ -18,6 +18,7 @@ test() ->
     {ok, eliminate} = test_eliminate(),
     {ok, assign} = test_assign(),
     {ok, assign_elimination} = test_assign_eliminates_from_peers(),
+    {ok, recursive_peer_elimination} = test_recursive_peer_elimination(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -100,6 +101,21 @@ test_assign_eliminates_from_peers() ->
     %% After assignment, the non-peers remain unchanged:
     NonPeerValues = dict:fetch("D1", ValuesDict),
     {ok, assign_elimination}.
+
+test_recursive_peer_elimination() ->
+    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    %% Eliminate all but two values from a peer of A3:
+    SetupDict = eliminate(grid_values(GridString), ["A2"], "2345689"),
+    "17" = dict:fetch("A2", SetupDict),
+
+    %% Assigning one of the above two values in A3 should trigger
+    %% peer elimination in A2 as well.
+    ValuesDict = assign(SetupDict, "A3", $7),
+    "1" = dict:fetch("A2", ValuesDict),
+    Fun = fun(Square) -> not (member($1, dict:fetch(Square, ValuesDict))) end,
+    true = all(Fun, peers("A2")),
+
+    {ok, recursive_peer_elimination}.
 
 allTrue(Booleans) ->
     %% Test support function:
