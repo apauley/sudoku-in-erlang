@@ -93,3 +93,7 @@ assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
     OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
     eliminate(ValuesDict, [Square], OtherValues).
+
+display(ValuesDict) ->
+    Fun = fun(Xs) -> {_, V} = Xs, V end,
+    lists:flatmap(Fun, lists:sort(dict:to_list(ValuesDict))).

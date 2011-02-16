@@ -3,7 +3,8 @@
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 grid_values/1, eliminate/3, assign/3]).
+                 grid_values/1, eliminate/3, assign/3,
+                 display/1]).
 -export([test/0]).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -19,6 +20,7 @@ test() ->
     {ok, assign} = test_assign(),
     {ok, assign_elimination} = test_assign_eliminates_from_peers(),
     {ok, recursive_peer_elimination} = test_recursive_peer_elimination(),
+    {ok, display} = test_display(),
     {ok, sudoku}.
 
 test_cross() ->
@@ -116,6 +118,12 @@ test_recursive_peer_elimination() ->
     true = all(Fun, peers("A2")),
 
     {ok, recursive_peer_elimination}.
+
+test_display() ->
+    GridString = ".17369825632158947958724316825437169791586432346912758289643571573291684164875293",
+    [$4|T] = display(eliminate(grid_values(GridString), ["A1"], "12356789")),
+    [$.|T] = GridString,
+    {ok, display}.
 
 allTrue(Booleans) ->
     %% Test support function:
