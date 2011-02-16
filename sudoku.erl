@@ -70,16 +70,14 @@ eliminate(ValuesDict, Square, Digits) ->
     NewDict = peer_eliminate(ValuesDict, Square, NewValues),
     dict:store(Square, NewValues, NewDict).
 
-peer_eliminate(ValuesDict, Square, NewValues) ->
+peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
-    case (length(NewValues) == 1) of
-        true ->
-            [AssignedValue|_] = NewValues,
-            Peers = peers(Square),
-            eliminate_from_squares(ValuesDict, Peers, AssignedValue);
-        false -> ValuesDict
-    end.
+    Peers = peers(Square),
+    eliminate_from_squares(ValuesDict, Peers, AssignedValue);
+
+peer_eliminate(ValuesDict, _, _) ->
+    ValuesDict.
 
 eliminate_from_squares(ValuesDict, [], _) ->
     ValuesDict;
