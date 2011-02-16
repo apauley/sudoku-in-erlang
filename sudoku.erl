@@ -63,33 +63,33 @@ zipfun(Square, Digit) ->
         false -> {Square, Digits}
     end.
 
-eliminate(ValuesDict, Square, Digits) ->
-    %% Eliminate all specified values for this square
+eliminate(ValuesDict, [], _) ->
+    ValuesDict;
+
+eliminate(ValuesDict, Squares, Digits) ->
+    %% Eliminate the specified Digits from all specified Squares.
+    [Square|T] = Squares,
     OldValues = dict:fetch(Square, ValuesDict),
     NewValues = lists:filter(fun(E) -> not member(E, Digits) end, OldValues),
-    NewDict = peer_eliminate(ValuesDict, Square, NewValues),
-    dict:store(Square, NewValues, NewDict).
+    NewDict1 = dict:store(Square, NewValues, ValuesDict),
+    NewDict2 = peer_eliminate(NewDict1, Square, NewValues, OldValues),
+    eliminate(NewDict2, T, Digits).
 
-peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
+peer_eliminate(ValuesDict, _, Vals, Vals) ->
+    %% NewValues and OldValues are the same, already eliminated.
+    ValuesDict;
+
+peer_eliminate(ValuesDict, Square, [AssignedValue], _) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
     Peers = peers(Square),
-    eliminate_from_squares(ValuesDict, Peers, AssignedValue);
+    eliminate(ValuesDict, Peers, [AssignedValue]);
 
-peer_eliminate(ValuesDict, _, _) ->
+peer_eliminate(ValuesDict, _, _, _) ->
+    %% Multiple values, cannot eliminate from peers.
     ValuesDict.
-
-eliminate_from_squares(ValuesDict, [], _) ->
-    ValuesDict;
-eliminate_from_squares(ValuesDict, Peers, Digit) ->
-    %% Eliminate Digit from the peers of Square
-    [H|T] = Peers,
-    OldValues = dict:fetch(H, ValuesDict),
-    NewValues = lists:delete(Digit, OldValues),
-    NewDict = dict:store(H, NewValues, ValuesDict),
-    eliminate_from_squares(NewDict, T, Digit).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
     OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
-    eliminate(ValuesDict, Square, OtherValues).
+    eliminate(ValuesDict, [Square], OtherValues).
