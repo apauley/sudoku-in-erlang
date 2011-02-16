@@ -4,4 +4,7 @@ main(_) ->
     {ok, sudoku} = compile:file(sudoku),
     {ok, unittests} = compile:file(unittests),
     {ok, sudoku} = unittests:test(),
-    io:format("All tests passed :-)~n").
+    io:format("All tests passed :-)~n~n"),
+    Input = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    Output = sudoku:solve(Input),
+    io:format("Input:  ~p~nOutput: ~p~n", [Input, Output]).

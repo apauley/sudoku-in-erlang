@@ -95,5 +95,10 @@ assign(ValuesDict, Square, Digit) ->
     eliminate(ValuesDict, [Square], OtherValues).
 
 display(ValuesDict) ->
-    Fun = fun(Xs) -> {_, V} = Xs, V end,
+    Fun = fun({_, [V]}) -> [V];
+             ({_, _}) -> "."
+          end,
     lists:flatmap(Fun, lists:sort(dict:to_list(ValuesDict))).
+
+solve(GridString) ->
+    display(grid_values(GridString)).
