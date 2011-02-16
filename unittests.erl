@@ -90,11 +90,15 @@ test_assign() ->
 
 test_assign_eliminates_from_peers() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    NonPeerValues = dict:fetch("D1", grid_values(GridString)),
     ValuesDict = assign(grid_values(GridString), "A3", $7),
 
     %% Now 7 may not be a possible value in any of A3's peers
    Fun = fun(Square) -> not (member($7, dict:fetch(Square, ValuesDict))) end,
    true = all(Fun, peers("A3")),
+
+    %% After assignment, the non-peers remain unchanged:
+    NonPeerValues = dict:fetch("D1", ValuesDict),
     {ok, assign_elimination}.
 
 allTrue(Booleans) ->
