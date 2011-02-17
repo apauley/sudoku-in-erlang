@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 grid_values/1, parse_grid/1, eliminate/3, assign/3,
+                 parse_grid/1, eliminate/3, assign/3,
                  display/1]).
 -export([test/0]).
 
@@ -15,7 +15,6 @@ test() ->
     ok = test_unitlist(),
     ok = test_units(),
     ok = test_peers(),
-    ok = test_grid_values(),
     ok = test_parse_grid(),
     ok = test_eliminate(),
     ok = test_assign(),
@@ -67,16 +66,6 @@ test_peers() ->
     %% Each square should have exactly 20 squares as its peers
     true = all(fun(Units) -> length(Units) == 20 end,
                [peers(Square) || Square <- squares()]),
-    ok.
-
-test_grid_values() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    ValuesDict = grid_values(GridString),
-    81 = length(dict:fetch_keys(ValuesDict)),
-    "4" = dict:fetch("A1", ValuesDict),
-    "123456789" = dict:fetch("A2", ValuesDict),
-    "8" = dict:fetch("A7", ValuesDict),
-    "3" = dict:fetch("B2", ValuesDict),
     ok.
 
 test_parse_grid() ->
@@ -143,3 +132,20 @@ allTrue(Booleans) ->
     %% I expect there should already be such a function,
     %% please point me to it if you can.
     all(fun(Bool) -> Bool end, Booleans).
+
+grid_values(GridString) ->
+    %% FIXME: Remove function, only used by tests
+    %% Converts a string of values into a dictionary of values keyed on square name.
+    %% Non-digits and "0" is allowed here, it indicates an unset square.
+    81 = length(GridString),
+    Tuples =  lists:zipwith(fun zipfun/2, squares(), GridString),
+    dict:from_list(Tuples).
+
+zipfun(Square, Digit) ->
+    %% FIXME: Remove function, only used by tests
+    Digits = sudoku:digits(),
+    case member(Digit, Digits) of
+        true -> {Square, [Digit]};
+        false -> {Square, Digits}
+    end.
+

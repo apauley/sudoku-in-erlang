@@ -70,20 +70,6 @@ empty_dict() ->
     Tuples =  lists:zipwith(fun(Square, _) -> {Square, digits()} end, squares(), squares()),
     dict:from_list(Tuples).
 
-grid_values(GridString) ->
-    %% Converts a string of values into a dictionary of values keyed on square name.
-    %% Non-digits and "0" is allowed here, it indicates an unset square.
-    81 = length(GridString),
-    Tuples =  lists:zipwith(fun zipfun/2, squares(), GridString),
-    dict:from_list(Tuples).
-
-zipfun(Square, Digit) ->
-    Digits = digits(),
-    case member(Digit, Digits) of
-        true -> {Square, [Digit]};
-        false -> {Square, Digits}
-    end.
-
 eliminate(ValuesDict, [], _) ->
     ValuesDict;
 
@@ -122,4 +108,4 @@ display(ValuesDict) ->
     lists:flatmap(Fun, lists:sort(dict:to_list(ValuesDict))).
 
 solve(GridString) ->
-    display(grid_values(GridString)).
+    display(parse_grid(GridString)).
