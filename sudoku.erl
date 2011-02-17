@@ -49,6 +49,27 @@ shallow_flatten(List) ->
     [H|T] = List,
     H ++ shallow_flatten(T).
 
+parse_grid(GridString) ->
+    parsed_dict(empty_dict(), squares(), GridString).
+
+parsed_dict(ValuesDict, [], []) ->
+    ValuesDict;
+parsed_dict(ValuesDict, [Square|Squares], [Value|GridString]) ->
+    IsDigit = member(Value, digits()),
+    NewDict = assign_if_possible(ValuesDict, Square, Value, IsDigit),
+    parsed_dict(NewDict, Squares, GridString).
+
+assign_if_possible(ValuesDict, Square, Value, true) ->
+    %% Value is a Digit, possible to assign
+    assign(ValuesDict, Square, Value);
+assign_if_possible(ValuesDict, _, _, false) ->
+    %% Not possible to assign
+    ValuesDict.
+
+empty_dict() ->
+    Tuples =  lists:zipwith(fun(Square, _) -> {Square, digits()} end, squares(), squares()),
+    dict:from_list(Tuples).
+
 grid_values(GridString) ->
     %% Converts a string of values into a dictionary of values keyed on square name.
     %% Non-digits and "0" is allowed here, it indicates an unset square.

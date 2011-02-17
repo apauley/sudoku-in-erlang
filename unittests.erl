@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 grid_values/1, eliminate/3, assign/3,
+                 grid_values/1, parse_grid/1, eliminate/3, assign/3,
                  display/1]).
 -export([test/0]).
 
@@ -16,6 +16,7 @@ test() ->
     {ok, units} = test_units(),
     {ok, peers} = test_peers(),
     {ok, grid_values} = test_grid_values(),
+    {ok, parse_grid} = test_parse_grid(),
     {ok, eliminate} = test_eliminate(),
     {ok, assign} = test_assign(),
     {ok, assign_elimination} = test_assign_eliminates_from_peers(),
@@ -77,6 +78,18 @@ test_grid_values() ->
     "8" = dict:fetch("A7", ValuesDict),
     "3" = dict:fetch("B2", ValuesDict),
     {ok, grid_values}.
+
+test_parse_grid() ->
+    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+
+    %% Unparsed values for reference
+    ValuesDict = grid_values(GridString),
+    "123456789" = dict:fetch("F2", ValuesDict),
+
+    %% A parsed grid will already  have determined the value of some squares
+    ParsedDict = parse_grid(GridString),
+    "456789" = dict:fetch("F2", ParsedDict),
+    {ok, parse_grid}.
 
 test_eliminate() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
