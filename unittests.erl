@@ -10,34 +10,34 @@
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
 %% http://armstrongonsoftware.blogspot.com/2009/01/micro-lightweight-unit-testing.html
 test() ->
-    {ok, cross} = test_cross(),
-    {ok, squares} = test_squares(),
-    {ok, unitlist} = test_unitlist(),
-    {ok, units} = test_units(),
-    {ok, peers} = test_peers(),
-    {ok, grid_values} = test_grid_values(),
-    {ok, parse_grid} = test_parse_grid(),
-    {ok, eliminate} = test_eliminate(),
-    {ok, assign} = test_assign(),
-    {ok, assign_elimination} = test_assign_eliminates_from_peers(),
-    {ok, recursive_peer_elimination} = test_recursive_peer_elimination(),
-    {ok, display} = test_display(),
-    {ok, sudoku}.
+    ok = test_cross(),
+    ok = test_squares(),
+    ok = test_unitlist(),
+    ok = test_units(),
+    ok = test_peers(),
+    ok = test_grid_values(),
+    ok = test_parse_grid(),
+    ok = test_eliminate(),
+    ok = test_assign(),
+    ok = test_assign_eliminates_from_peers(),
+    ok = test_recursive_peer_elimination(),
+    ok = test_display(),
+    ok.
 
 test_cross() ->
     ["A1","A2","B1","B2"] = cross("AB", "12"),
-    {ok, cross}.
+    ok.
 
 test_squares() ->
     81 = length(squares()),
-    {ok, squares}.
+    ok.
 
 test_unitlist() ->
     [["A1","B1","C1","D1","E1","F1","G1","H1","I1"]|_] = col_squares(),
     [["A1","A2","A3","A4","A5","A6","A7","A8","A9"]|_] = row_squares(),
     [["A1","A2","A3","B1","B2","B3","C1","C2","C3"]|_] = box_squares(),
     27 = length(unitlist()),
-    {ok, unitlist}.
+    ok.
 
 test_units() ->
     [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
@@ -55,7 +55,7 @@ test_units() ->
                        units(Square)) || Square <- squares()],
 
     true = allTrue(TruthValues),
-    {ok, units}.
+    ok.
 
 test_peers() ->
     Peers = lists:sort(["C8", "F2", "G2", "H2", "C7",
@@ -67,7 +67,7 @@ test_peers() ->
     %% Each square should have exactly 20 squares as its peers
     true = all(fun(Units) -> length(Units) == 20 end,
                [peers(Square) || Square <- squares()]),
-    {ok, peers}.
+    ok.
 
 test_grid_values() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
@@ -77,7 +77,7 @@ test_grid_values() ->
     "123456789" = dict:fetch("A2", ValuesDict),
     "8" = dict:fetch("A7", ValuesDict),
     "3" = dict:fetch("B2", ValuesDict),
-    {ok, grid_values}.
+    ok.
 
 test_parse_grid() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
@@ -89,20 +89,20 @@ test_parse_grid() ->
     %% A parsed grid will already  have determined the value of some squares
     ParsedDict = parse_grid(GridString),
     "456789" = dict:fetch("F2", ParsedDict),
-    {ok, parse_grid}.
+    ok.
 
 test_eliminate() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
     ValuesDict = eliminate(grid_values(GridString), ["A2"], "3"),
     "12456789" = dict:fetch("A2", ValuesDict),
     "2457" = dict:fetch("A2", eliminate(ValuesDict, ["A2"], "13689")),
-    {ok, eliminate}.
+    ok.
 
 test_assign() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
     ValuesDict = assign(grid_values(GridString), "A2", $1),
     "1" = dict:fetch("A2", ValuesDict),
-    {ok, assign}.
+    ok.
 
 test_assign_eliminates_from_peers() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
@@ -115,7 +115,7 @@ test_assign_eliminates_from_peers() ->
 
     %% After assignment, the non-peers remain unchanged:
     NonPeerValues = dict:fetch("D1", ValuesDict),
-    {ok, assign_elimination}.
+    ok.
 
 test_recursive_peer_elimination() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
@@ -129,14 +129,13 @@ test_recursive_peer_elimination() ->
     "1" = dict:fetch("A2", ValuesDict),
     Fun = fun(Square) -> not (member($1, dict:fetch(Square, ValuesDict))) end,
     true = all(Fun, peers("A2")),
-
-    {ok, recursive_peer_elimination}.
+    ok.
 
 test_display() ->
     GridString = ".17369825632158947958724316825437169791586432346912758289643571573291684164875293",
     [$4|T] = display(eliminate(grid_values(GridString), ["A1"], "12356789")),
     [$.|T] = GridString,
-    {ok, display}.
+    ok.
 
 allTrue(Booleans) ->
     %% Test support function:
