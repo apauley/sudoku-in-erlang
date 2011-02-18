@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 parse_grid/1, eliminate/3, assign/3,
+                 empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  display/1]).
 -export([test/0]).
 
@@ -71,32 +71,25 @@ test_peers() ->
 test_parse_grid() ->
     GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
 
-    %% Unparsed values for reference
-    ValuesDict = grid_values(GridString),
-    "123456789" = dict:fetch("F2", ValuesDict),
-
-    %% A parsed grid will already  have determined the value of some squares
+    %% A parsed grid will already have eliminated the values of some squares
     ParsedDict = parse_grid(GridString),
     "456789" = dict:fetch("F2", ParsedDict),
     ok.
 
 test_eliminate() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    ValuesDict = eliminate(grid_values(GridString), ["A2"], "3"),
+    ValuesDict = eliminate(empty_dict(), ["A2"], "3"),
     "12456789" = dict:fetch("A2", ValuesDict),
     "2457" = dict:fetch("A2", eliminate(ValuesDict, ["A2"], "13689")),
     ok.
 
 test_assign() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    ValuesDict = assign(grid_values(GridString), "A2", $1),
+    ValuesDict = assign(empty_dict(), "A2", $1),
     "1" = dict:fetch("A2", ValuesDict),
     ok.
 
 test_assign_eliminates_from_peers() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
-    NonPeerValues = dict:fetch("D1", grid_values(GridString)),
-    ValuesDict = assign(grid_values(GridString), "A3", $7),
+    NonPeerValues = dict:fetch("D1", empty_dict()),
+    ValuesDict = assign(empty_dict(), "A3", $7),
 
     %% Now 7 may not be a possible value in any of A3's peers
     Fun = fun(Square) -> not (member($7, dict:fetch(Square, ValuesDict))) end,
@@ -107,9 +100,8 @@ test_assign_eliminates_from_peers() ->
     ok.
 
 test_recursive_peer_elimination() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
     %% Eliminate all but two values from a peer of A3:
-    SetupDict = eliminate(grid_values(GridString), ["A2"], "2345689"),
+    SetupDict = eliminate(empty_dict(), ["A2"], "2345689"),
     "17" = dict:fetch("A2", SetupDict),
 
     %% Assigning one of the above two values in A3 should trigger
@@ -122,7 +114,7 @@ test_recursive_peer_elimination() ->
 
 test_display() ->
     GridString = ".17369825632158947958724316825437169791586432346912758289643571573291684164875293",
-    [$4|T] = display(eliminate(grid_values(GridString), ["A1"], "12356789")),
+    [$4|T] = display(eliminate(parse_grid(GridString), ["A1"], "12356789")),
     [$.|T] = GridString,
     ok.
 
@@ -132,20 +124,3 @@ allTrue(Booleans) ->
     %% I expect there should already be such a function,
     %% please point me to it if you can.
     all(fun(Bool) -> Bool end, Booleans).
-
-grid_values(GridString) ->
-    %% FIXME: Remove function, only used by tests
-    %% Converts a string of values into a dictionary of values keyed on square name.
-    %% Non-digits and "0" is allowed here, it indicates an unset square.
-    81 = length(GridString),
-    Tuples =  lists:zipwith(fun zipfun/2, squares(), GridString),
-    dict:from_list(Tuples).
-
-zipfun(Square, Digit) ->
-    %% FIXME: Remove function, only used by tests
-    Digits = sudoku:digits(),
-    case member(Digit, Digits) of
-        true -> {Square, [Digit]};
-        false -> {Square, Digits}
-    end.
-
