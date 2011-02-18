@@ -15,6 +15,7 @@ test() ->
     ok = test_unitlist(),
     ok = test_units(),
     ok = test_peers(),
+    ok = test_empty_dict(),
     ok = test_parse_grid(),
     ok = test_eliminate(),
     ok = test_assign(),
@@ -66,6 +67,12 @@ test_peers() ->
     %% Each square should have exactly 20 squares as its peers
     true = all(fun(Units) -> length(Units) == 20 end,
                [peers(Square) || Square <- squares()]),
+    ok.
+
+test_empty_dict() ->
+    ValuesDict = empty_dict(),
+    Squares = squares(),
+    Squares = lists:sort(dict:fetch_keys(ValuesDict)),
     ok.
 
 test_parse_grid() ->
