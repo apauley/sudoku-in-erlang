@@ -1,6 +1,6 @@
 -module(unittests).
 -import(lists, [all/2, member/2]).
--import(sudoku, [cross/2,
+-import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
@@ -72,7 +72,12 @@ test_peers() ->
 test_empty_dict() ->
     ValuesDict = empty_dict(),
     Squares = squares(),
+    Digits = digits(),
     Squares = lists:sort(dict:fetch_keys(ValuesDict)),
+
+    %% The values of all keys should start with all possible values.
+    true = all(fun(Values) -> Values == Digits end,
+               [dict:fetch(Square, ValuesDict) || Square <- Squares]),
     ok.
 
 test_parse_grid() ->
