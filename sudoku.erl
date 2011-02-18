@@ -70,6 +70,11 @@ empty_dict() ->
     Digits = digits(),
     dict:from_list([{Square, Digits} || Square <- squares()]).
 
+assign(ValuesDict, Square, Digit) ->
+    %% Assign by eliminating all values except the assigned value.
+    OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
+    eliminate(ValuesDict, [Square], OtherValues).
+
 eliminate(ValuesDict, [], _) ->
     ValuesDict;
 
@@ -95,11 +100,6 @@ peer_eliminate(ValuesDict, Square, [AssignedValue], _) ->
 peer_eliminate(ValuesDict, _, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     ValuesDict.
-
-assign(ValuesDict, Square, Digit) ->
-    %% Assign by eliminating all values except the assigned value.
-    OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
-    eliminate(ValuesDict, [Square], OtherValues).
 
 display(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];
