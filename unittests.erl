@@ -20,6 +20,7 @@ test() ->
     ok = test_eliminate(),
     ok = test_assign(),
     ok = test_assign_eliminates_from_peers(),
+    ok = test_automatically_assign_last_possible_square(),
     ok = test_recursive_peer_elimination(),
     ok = test_display(),
     ok.
@@ -122,6 +123,13 @@ test_recursive_peer_elimination() ->
     "1" = dict:fetch("A2", ValuesDict),
     Fun = fun(Square) -> not (member($1, dict:fetch(Square, ValuesDict))) end,
     true = all(Fun, peers("A2")),
+    ok.
+
+test_automatically_assign_last_possible_square() ->
+    GridString = "417......6.2......958............................................................",
+    ValuesDict = parse_grid(GridString),
+    B2 = dict:fetch("B2", ValuesDict),
+    "3" = B2,
     ok.
 
 test_display() ->
