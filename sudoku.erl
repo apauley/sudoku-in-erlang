@@ -67,8 +67,8 @@ assign_if_possible(ValuesDict, _, _, false) ->
     ValuesDict.
 
 empty_dict() ->
-    Tuples =  lists:zipwith(fun(Square, _) -> {Square, digits()} end, squares(), squares()),
-    dict:from_list(Tuples).
+    Digits = digits(),
+    dict:from_list([{Square, Digits} || Square <- squares()]).
 
 eliminate(ValuesDict, [], _) ->
     ValuesDict;
