@@ -36,6 +36,9 @@ peer_eliminate(ValuesDict, _, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     ValuesDict.
 
+places_for_value(ValuesDict, Unit, Digit) ->
+    [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
+
 display(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];
              ({_, _}) -> "."

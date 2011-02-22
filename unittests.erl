@@ -4,7 +4,7 @@
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
-                 display/1]).
+                 places_for_value/3, display/1]).
 -export([test/0]).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -20,8 +20,9 @@ test() ->
     ok = test_eliminate(),
     ok = test_assign(),
     ok = test_assign_eliminates_from_peers(),
-    ok = test_automatically_assign_last_possible_square(),
     ok = test_recursive_peer_elimination(),
+    ok = test_automatically_assign_last_possible_square(),
+    ok = test_places_for_value(),
     ok = test_display(),
     ok.
 
@@ -130,6 +131,16 @@ test_automatically_assign_last_possible_square() ->
     ValuesDict = parse_grid(GridString),
     B2 = dict:fetch("B2", ValuesDict),
     "3" = B2,
+    ok.
+
+test_places_for_value() ->
+    GridString = ".45.81376........................................................................",
+    ValuesDict = parse_grid(GridString),
+    "29" = dict:fetch("A1", ValuesDict),
+    "29" = dict:fetch("A4", ValuesDict),
+    Unit = ["A1","A2","A3","A4","A5","A6","A7","A8","A9"],
+    ["A1","A4"] = places_for_value(ValuesDict, Unit, $9),
+    ["A1","A4"] = places_for_value(ValuesDict, Unit, $2),
     ok.
 
 test_display() ->
