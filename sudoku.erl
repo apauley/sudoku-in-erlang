@@ -12,10 +12,8 @@ assign(ValuesDict, Square, Digit) ->
 
 eliminate(ValuesDict, [], _) ->
     ValuesDict;
-
-eliminate(ValuesDict, Squares, Digits) ->
+eliminate(ValuesDict, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
-    [Square|T] = Squares,
     OldValues = dict:fetch(Square, ValuesDict),
     NewValues = lists:filter(fun(E) -> not member(E, Digits) end, OldValues),
     NewDict1 = dict:store(Square, NewValues, ValuesDict),
@@ -29,17 +27,15 @@ eliminate(ValuesDict, Squares, Digits) ->
 
 assign_unique_place(ValuesDict, [], _) ->
     ValuesDict;
-assign_unique_place(ValuesDict, Units, Digits) ->
+assign_unique_place(ValuesDict, [Unit|T], Digits) ->
     %% If a certain digit can only be in one place in a unit,
     %% assign it.
-    [Unit|T] = Units,
     NewDict = assign_unique_place_for_unit(ValuesDict, Unit, Digits),
     assign_unique_place(NewDict, T, Digits).
 
 assign_unique_place_for_unit(ValuesDict, _, []) ->
     ValuesDict;
-assign_unique_place_for_unit(ValuesDict, Unit, Digits) ->
-    [Digit|T] = Digits,
+assign_unique_place_for_unit(ValuesDict, Unit, [Digit|T]) ->
     Places = places_for_value(ValuesDict, Unit, Digit),
     NewDict = assign_unique_place_for_digit(ValuesDict, Places, Digit),
     assign_unique_place_for_unit(NewDict, Unit, T).
@@ -138,6 +134,5 @@ peers(Square) ->
     lists:delete(Square, PeersWithSelf).
 
 shallow_flatten([]) -> [];
-shallow_flatten(List) ->
-    [H|T] = List,
+shallow_flatten([H|T]) ->
     H ++ shallow_flatten(T).
