@@ -77,13 +77,13 @@ parsed_dict(ValuesDict, [], []) ->
     ValuesDict;
 parsed_dict(ValuesDict, [Square|Squares], [Value|GridString]) ->
     IsDigit = member(Value, digits()),
-    NewDict = assign_if_possible(ValuesDict, Square, Value, IsDigit),
+    NewDict = assign_if_digit(ValuesDict, Square, Value, IsDigit),
     parsed_dict(NewDict, Squares, GridString).
 
-assign_if_possible(ValuesDict, Square, Value, true) ->
+assign_if_digit(ValuesDict, Square, Value, true) ->
     %% Value is a Digit, possible to assign
     assign(ValuesDict, Square, Value);
-assign_if_possible(ValuesDict, _, _, false) ->
+assign_if_digit(ValuesDict, _, _, false) ->
     %% Not possible to assign
     ValuesDict.
 
