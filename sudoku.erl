@@ -71,7 +71,14 @@ display(ValuesDict) ->
     lists:flatmap(Fun, lists:sort(dict:to_list(ValuesDict))).
 
 parse_grid(GridString) ->
-    parsed_dict(empty_dict(), squares(), GridString).
+    CleanGrid = clean_grid(GridString),
+    81 = length(CleanGrid),
+    parsed_dict(empty_dict(), squares(), CleanGrid).
+
+clean_grid(GridString) ->
+    %% Return a string with only digits, 0 and .
+    ValidChars = digits() ++ "0.",
+    lists:filter(fun(E) -> member(E, ValidChars) end, GridString).
 
 parsed_dict(ValuesDict, [], []) ->
     ValuesDict;

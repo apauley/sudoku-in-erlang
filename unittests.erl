@@ -3,6 +3,7 @@
 -import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
+                 clean_grid/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, display/1]).
 -export([test/0]).
@@ -16,6 +17,7 @@ test() ->
     ok = test_units(),
     ok = test_peers(),
     ok = test_empty_dict(),
+    ok = test_clean_grid(),
     ok = test_parse_grid(),
     ok = test_eliminate(),
     ok = test_assign(),
@@ -82,8 +84,22 @@ test_empty_dict() ->
                [dict:fetch(Square, ValuesDict) || Square <- Squares]),
     ok.
 
+test_clean_grid() ->
+    GridString = "|4..-...-805|
+.3.+...+...",
+    "4.....805.3......." = clean_grid(GridString),
+    ok.
+
 test_parse_grid() ->
-    GridString = "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......",
+    GridString = "4.....8.5
+.3.......
+...7.....
+.2.....6.
+....8.4..
+....1....
+...6.3.7.
+5..2.....
+1.4......",
 
     %% A parsed grid will already have eliminated the values of some squares
     ParsedDict = parse_grid(GridString),
