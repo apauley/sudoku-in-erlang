@@ -20,7 +20,36 @@ eliminate(ValuesDict, Squares, Digits) ->
     NewValues = lists:filter(fun(E) -> not member(E, Digits) end, OldValues),
     NewDict1 = dict:store(Square, NewValues, ValuesDict),
     NewDict2 = peer_eliminate(NewDict1, Square, NewValues, OldValues),
-    eliminate(NewDict2, T, Digits).
+
+    %% Digits have been eliminated from this Square.
+    %% Now see if the elimination has created a unique place for a digit
+    %% to live in the surrounding units of this Square.
+    NewDict3 = assign_unique_place(NewDict2, units(Square), Digits),
+    eliminate(NewDict3, T, Digits).
+
+assign_unique_place(ValuesDict, [], _) ->
+    ValuesDict;
+assign_unique_place(ValuesDict, Units, Digits) ->
+    %% If a certain digit can only be in one place in a unit,
+    %% assign it.
+    [Unit|T] = Units,
+    NewDict = assign_unique_place_for_unit(ValuesDict, Unit, Digits),
+    assign_unique_place(NewDict, T, Digits).
+
+assign_unique_place_for_unit(ValuesDict, _, []) ->
+    ValuesDict;
+assign_unique_place_for_unit(ValuesDict, Unit, Digits) ->
+    [Digit|T] = Digits,
+    Places = places_for_value(ValuesDict, Unit, Digit),
+    NewDict = assign_unique_place_for_digit(ValuesDict, Places, Digit),
+    assign_unique_place_for_unit(NewDict, Unit, T).
+
+assign_unique_place_for_digit(ValuesDict, [Square], Digit) ->
+    %% Unique place for Digit found, assign
+    assign(ValuesDict, Square, Digit);
+assign_unique_place_for_digit(ValuesDict, _, _) ->
+    %% Mutlitple palces (or none) found for Digit
+    ValuesDict.
 
 peer_eliminate(ValuesDict, _, Vals, Vals) ->
     %% NewValues and OldValues are the same, already eliminated.

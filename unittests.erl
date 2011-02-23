@@ -21,7 +21,7 @@ test() ->
     ok = test_assign(),
     ok = test_assign_eliminates_from_peers(),
     ok = test_recursive_peer_elimination(),
-    ok = test_automatically_assign_last_possible_square(),
+    ok = test_automatically_assign_unique_places(),
     ok = test_places_for_value(),
     ok = test_display(),
     ok.
@@ -87,7 +87,7 @@ test_parse_grid() ->
 
     %% A parsed grid will already have eliminated the values of some squares
     ParsedDict = parse_grid(GridString),
-    "456789" = dict:fetch("F2", ParsedDict),
+    "4" = dict:fetch("F2", ParsedDict),
     ok.
 
 test_eliminate() ->
@@ -126,11 +126,11 @@ test_recursive_peer_elimination() ->
     true = all(Fun, peers("A2")),
     ok.
 
-test_automatically_assign_last_possible_square() ->
-    GridString = "417......6.2......958............................................................",
+test_automatically_assign_unique_places() ->
+    %% This grid was chosen so that C9 is a unique place for the digit 2
+    GridString = ".....3.17.15..9..8.6.......1....7.....9...2.....5....4.......2.5..6..34.34.2.....",
     ValuesDict = parse_grid(GridString),
-    B2 = dict:fetch("B2", ValuesDict),
-    "3" = B2,
+    "2" = dict:fetch("C9", ValuesDict),
     ok.
 
 test_places_for_value() ->
