@@ -3,14 +3,8 @@
 -compile(export_all).
 
 print_results(FileName, Seperator) ->
-    io:format("Solutions from ~s:~n", [FileName]),
-    print_solutions(solve_file(FileName, Seperator)).
-
-print_solutions([]) ->
-    io:format("~n");
-print_solutions([Solution|T]) ->
-    io:format("~s~n", [Solution]),
-    print_solutions(T).
+    Solutions = solve_file(FileName, Seperator),
+    io:format("Solved ? of ~p puzzles from ~s~n", [length(Solutions), FileName]).
 
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
