@@ -1,12 +1,12 @@
 -module(sudoku).
--import(lists, [member/2]).
+-import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1]).
 -compile(export_all).
 
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
 
 solve_all(GridList) ->
-    lists:map(fun solve/1, GridList).
+    map(fun solve/1, GridList).
 
 from_file(FileName, Seperator) ->
     {ok, BinData} = file:read_file(FileName),
@@ -25,7 +25,7 @@ eliminate(ValuesDict, [], _) ->
 eliminate(ValuesDict, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
     OldValues = dict:fetch(Square, ValuesDict),
-    NewValues = lists:filter(fun(E) -> not member(E, Digits) end, OldValues),
+    NewValues = filter(fun(E) -> not member(E, Digits) end, OldValues),
     NewDict1 = dict:store(Square, NewValues, ValuesDict),
     NewDict2 = peer_eliminate(NewDict1, Square, NewValues, OldValues),
 
@@ -78,7 +78,7 @@ display(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];
              ({_, _}) -> "."
           end,
-    lists:flatmap(Fun, lists:sort(dict:to_list(ValuesDict))).
+    flatmap(Fun, sort(dict:to_list(ValuesDict))).
 
 parse_grid(GridString) ->
     CleanGrid = clean_grid(GridString),
@@ -88,7 +88,7 @@ parse_grid(GridString) ->
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
     ValidChars = digits() ++ "0.",
-    lists:filter(fun(E) -> member(E, ValidChars) end, GridString).
+    filter(fun(E) -> member(E, ValidChars) end, GridString).
 
 parsed_dict(ValuesDict, [], []) ->
     ValuesDict;
