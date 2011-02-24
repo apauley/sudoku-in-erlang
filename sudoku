@@ -13,12 +13,16 @@ run_solver(["runtests"]) ->
     ok = unittests:test(),
     io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-    print_solutions(solve_file("easy50.txt", "========")),
-    print_solutions(solve_file("top95.txt", "\n")),
-    print_solutions(solve_file("hardest.txt", "\n")).
+    print_results("easy50.txt", "========"),
+    print_results("top95.txt", "\n"),
+    print_results("hardest.txt", "\n").
+
+print_results(FileName, Seperator) ->
+    io:format("Solutions from ~s:~n", [FileName]),
+    print_solutions(solve_file(FileName, Seperator)).
 
 print_solutions([]) ->
-    ok;
+    io:format("~n");
 print_solutions([Solution|T]) ->
     io:format("~s~n", [Solution]),
     print_solutions(T).
