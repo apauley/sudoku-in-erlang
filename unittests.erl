@@ -5,7 +5,7 @@
                  unitlist/0, units/1, peers/1,
                  clean_grid/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
-                 places_for_value/3, display/1]).
+                 places_for_value/3, to_string/1]).
 -export([test/0]).
 
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
@@ -25,7 +25,7 @@ test() ->
     ok = test_recursive_peer_elimination(),
     ok = test_automatically_assign_unique_places(),
     ok = test_places_for_value(),
-    ok = test_display(),
+    ok = test_to_string(),
     ok.
 
 test_cross() ->
@@ -159,9 +159,9 @@ test_places_for_value() ->
     ["A1","A4"] = places_for_value(ValuesDict, Unit, $2),
     ok.
 
-test_display() ->
+test_to_string() ->
     GridString = ".17369825632158947958724316825437169791586432346912758289643571573291684164875293",
-    [$4|T] = display(eliminate(parse_grid(GridString), ["A1"], "12356789")),
+    [$4|T] = to_string(eliminate(parse_grid(GridString), ["A1"], "12356789")),
     [$.|T] = GridString,
     ok.
 

@@ -13,7 +13,7 @@ from_file(FileName, Seperator) ->
     string:tokens(binary_to_list(BinData), Seperator).
 
 solve(GridString) ->
-    display(parse_grid(GridString)).
+    to_string(parse_grid(GridString)).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
@@ -74,7 +74,7 @@ peer_eliminate(ValuesDict, _, _, _) ->
 places_for_value(ValuesDict, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
 
-display(ValuesDict) ->
+to_string(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];
              ({_, _}) -> "."
           end,
