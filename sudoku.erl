@@ -2,6 +2,9 @@
 -import(lists, [member/2]).
 -compile(export_all).
 
+solve_file(FileName) ->
+    solve_all(from_file(FileName)).
+
 solve_all(GridList) ->
     lists:map(fun solve/1, GridList).
 
