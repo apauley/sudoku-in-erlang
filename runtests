@@ -6,12 +6,10 @@ main(_) ->
     {ok, unittests} = compile:file(unittests),
     ok = unittests:test(),
     io:format("All tests passed :-)~n"),
-    Solutions = solve_all(from_file("hardest.txt")),
-    io:format("Solutions: ~p~n", [Solutions]),
-    print_solution("4.73698.563...8......7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"),
-    print_solution("000003017015009008060000000100007000009000200000500004000000020500600340340200000"),
-    print_solution("2...8.3...6..7..84.3.5..2.9...1.54.8.........4.27.6...3.1..7.4.72..4..6...4.1...3").
+    print_solutions(solve_all(from_file("hardest.txt"))).
 
-print_solution(Input) ->
-    Output = sudoku:solve(Input),
-    io:format("~nInput:  ~p~nOutput: ~p~n", [Input, Output]).
+print_solutions([]) ->
+    ok;
+print_solutions([Solution|T]) ->
+    io:format("~s~n", [Solution]),
+    print_solutions(T).
