@@ -4,7 +4,8 @@
 
 print_results(FileName, Seperator) ->
     Solutions = solve_file(FileName, Seperator),
-    io:format("Solved ? of ~p puzzles from ~s~n", [length(Solutions), FileName]).
+    Solved = filter(fun(Dict) -> is_solved(Dict) end, Solutions),
+    io:format("Solved ~p of ~p puzzles from ~s~n", [length(Solved), length(Solutions), FileName]).
 
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
