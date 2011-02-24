@@ -1,5 +1,5 @@
 -module(sudoku).
--import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1]).
+-import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2]).
 -compile(export_all).
 
 print_results(FileName, Seperator) ->
@@ -15,6 +15,13 @@ solve_all(GridList) ->
 from_file(FileName, Seperator) ->
     {ok, BinData} = file:read_file(FileName),
     string:tokens(binary_to_list(BinData), Seperator).
+
+is_solved(ValuesDict) ->
+    all(fun(Unit) -> is_unit_solved(ValuesDict, Unit) end, unitlist()).
+
+is_unit_solved(ValuesDict, Unit) ->
+    UnitValues = flatmap(fun(S) -> dict:fetch(S, ValuesDict) end, Unit),
+    (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
 solve(GridString) ->
     parse_grid(GridString).

@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 clean_grid/1,
+                 clean_grid/1, is_solved/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
 -export([test/0]).
@@ -25,6 +25,7 @@ test() ->
     ok = test_recursive_peer_elimination(),
     ok = test_automatically_assign_unique_places(),
     ok = test_places_for_value(),
+    ok = test_is_solved(),
     ok = test_to_string(),
     ok.
 
@@ -157,6 +158,13 @@ test_places_for_value() ->
     Unit = ["A1","A2","A3","A4","A5","A6","A7","A8","A9"],
     ["A1","A4"] = places_for_value(ValuesDict, Unit, $9),
     ["A1","A4"] = places_for_value(ValuesDict, Unit, $2),
+    ok.
+
+test_is_solved() ->
+    GridString = "417369825632158947958724316825437169791586432346912758289643571573291684164875293",
+    SolvedDict = parse_grid(GridString),
+    true = is_solved(SolvedDict),
+    false = is_solved(empty_dict()),
     ok.
 
 test_to_string() ->
