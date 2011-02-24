@@ -4,14 +4,15 @@
 
 print_results(FileName, Seperator) ->
     Solutions = solve_file(FileName, Seperator),
-    Solved = filter(fun(Dict) -> is_solved(Dict) end, Solutions),
-    io:format("Solved ~p of ~p puzzles from ~s~n", [length(Solved), length(Solutions), FileName]).
+    Solved = filter(fun({_, Dict}) -> is_solved(Dict) end, Solutions),
+    io:format("Solved ~p of ~p puzzles from ~s~n",
+              [length(Solved), length(Solutions), FileName]).
 
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
 
 solve_all(GridList) ->
-    map(fun solve/1, GridList).
+    map(fun time_solve/1, GridList).
 
 from_file(FileName, Seperator) ->
     {ok, BinData} = file:read_file(FileName),
