@@ -77,11 +77,11 @@ test_peers() ->
 
 test_empty_dict() ->
     ValuesDict = empty_dict(),
-    Squares = squares(),
-    Digits = digits(),
-    Squares = lists:sort(dict:fetch_keys(ValuesDict)),
+    true = is_sudoku_dict(ValuesDict),
 
     %% The values of all keys should start with all possible values.
+    Squares = squares(),
+    Digits = digits(),
     true = all(fun(Values) -> Values == Digits end,
                [dict:fetch(Square, ValuesDict) || Square <- Squares]),
     ok.
