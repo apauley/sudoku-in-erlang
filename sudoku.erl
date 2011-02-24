@@ -2,6 +2,13 @@
 -import(lists, [member/2]).
 -compile(export_all).
 
+solve_all(GridList) ->
+    lists:map(fun solve/1, GridList).
+
+from_file(FileName) ->
+    {ok, BinData} = file:read_file(FileName),
+    string:tokens(binary_to_list(BinData), "\n").
+
 solve(GridString) ->
     display(parse_grid(GridString)).
 
