@@ -14,6 +14,7 @@ run_solver(["runtests"]) ->
     io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
     print_solutions(solve_file("easy50.txt", "========")),
+    print_solutions(solve_file("top95.txt", "\n")),
     print_solutions(solve_file("hardest.txt", "\n")).
 
 print_solutions([]) ->
