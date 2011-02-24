@@ -17,7 +17,7 @@ from_file(FileName, Seperator) ->
     string:tokens(binary_to_list(BinData), Seperator).
 
 solve(GridString) ->
-    to_string(parse_grid(GridString)).
+    parse_grid(GridString).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
