@@ -1,5 +1,5 @@
 #!/usr/bin/env escript
--import(sudoku, [solve_file/2]).
+-import(sudoku, [print_results/2]).
 
 main(Args) ->
     {ok, sudoku} = compile:file(sudoku),
@@ -16,13 +16,3 @@ run_solver(["solve"]) ->
     print_results("easy50.txt", "========"),
     print_results("top95.txt", "\n"),
     print_results("hardest.txt", "\n").
-
-print_results(FileName, Seperator) ->
-    io:format("Solutions from ~s:~n", [FileName]),
-    print_solutions(solve_file(FileName, Seperator)).
-
-print_solutions([]) ->
-    io:format("~n");
-print_solutions([Solution|T]) ->
-    io:format("~s~n", [Solution]),
-    print_solutions(T).

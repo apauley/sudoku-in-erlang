@@ -2,6 +2,16 @@
 -import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1]).
 -compile(export_all).
 
+print_results(FileName, Seperator) ->
+    io:format("Solutions from ~s:~n", [FileName]),
+    print_solutions(solve_file(FileName, Seperator)).
+
+print_solutions([]) ->
+    io:format("~n");
+print_solutions([Solution|T]) ->
+    io:format("~s~n", [Solution]),
+    print_solutions(T).
+
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
 
