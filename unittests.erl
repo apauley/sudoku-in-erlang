@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1,
-                 clean_grid/1, is_solved/1,
+                 clean_grid/1, is_solved/1, time_solve/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
 -export([test/0]).
@@ -26,6 +26,7 @@ test() ->
     ok = test_automatically_assign_unique_places(),
     ok = test_places_for_value(),
     ok = test_is_solved(),
+    ok = test_time_solve(),
     ok = test_to_string(),
     ok.
 
@@ -167,11 +168,21 @@ test_is_solved() ->
     false = is_solved(empty_dict()),
     ok.
 
+test_time_solve() ->
+    GridString = ".45.81376........................................................................",
+    {MicroSeconds, Dict} = time_solve(GridString),
+    true = is_integer(MicroSeconds),
+    true = is_sudoku_dict(Dict),
+    ok.
+
 test_to_string() ->
     GridString = ".17369825632158947958724316825437169791586432346912758289643571573291684164875293",
     [$4|T] = to_string(eliminate(parse_grid(GridString), ["A1"], "12356789")),
     [$.|T] = GridString,
     ok.
+
+is_sudoku_dict(ValuesDict) ->
+    lists:sort(dict:fetch_keys(ValuesDict)) == squares().
 
 allTrue(Booleans) ->
     %% Test support function:

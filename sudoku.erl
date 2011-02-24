@@ -24,6 +24,9 @@ is_unit_solved(ValuesDict, Unit) ->
     UnitValues = flatmap(fun(S) -> dict:fetch(S, ValuesDict) end, Unit),
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
+time_solve(GridString) ->
+    timer:tc(sudoku, solve, [GridString]).
+
 solve(GridString) ->
     parse_grid(GridString).
 
