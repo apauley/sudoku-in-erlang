@@ -1,11 +1,18 @@
 #!/usr/bin/env escript
 -import(sudoku, [solve_file/2]).
 
-main(_) ->
+main(Args) ->
     {ok, sudoku} = compile:file(sudoku),
     {ok, unittests} = compile:file(unittests),
+    run_solver(Args).
+
+run_solver([]) ->
+    run_solver(["runtests"]),
+    run_solver(["solve"]);
+run_solver(["runtests"]) ->
     ok = unittests:test(),
-    io:format("All tests passed :-)~n"),
+    io:format("All tests passed :-)~n");
+run_solver(["solve"]) ->
     print_solutions(solve_file("easy50.txt", "========")),
     print_solutions(solve_file("hardest.txt", "\n")).
 
