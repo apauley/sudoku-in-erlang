@@ -20,7 +20,10 @@ time_stats(Solutions, FileName) ->
      TotalTime, Min, Max, Avg, Hz].
 
 solve_file(FileName, Seperator) ->
-    solve_all(from_file(FileName, Seperator)).
+    Solutions = solve_all(from_file(FileName, Seperator)),
+    OutFileName = [filename:basename(FileName, ".txt")|".out"],
+    ok = to_file(OutFileName, Solutions),
+    Solutions.
 
 solve_all(GridList) ->
     map(fun time_solve/1, GridList).
@@ -28,6 +31,10 @@ solve_all(GridList) ->
 from_file(FileName, Seperator) ->
     {ok, BinData} = file:read_file(FileName),
     string:tokens(binary_to_list(BinData), Seperator).
+
+to_file(FileName, Solutions) ->
+    GridStrings = map(fun({_, S}) -> [to_string(S)|"\n"] end, Solutions),
+    ok = file:write_file(FileName, list_to_binary(GridStrings)).
 
 is_solved(ValuesDict) ->
     all(fun(Unit) -> is_unit_solved(ValuesDict, Unit) end, unitlist()).
