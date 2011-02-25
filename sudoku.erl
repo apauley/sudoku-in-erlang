@@ -4,7 +4,8 @@
 
 print_results(Filename, Seperator) ->
     Solutions = solve_file(Filename, Seperator),
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (min ~f, max ~f, avg ~f (~f Hz))~n",
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs
+\t(avg ~f sec (~f Hz) max ~f secs, min ~f secs)~n",
     io:format(Msg, time_stats(Solutions, Filename)).
 
 time_stats(Solutions, Filename) ->
@@ -17,7 +18,7 @@ time_stats(Solutions, Filename) ->
     Avg = TotalTime/NumberPuzzles,
     Hz = NumberPuzzles/TotalTime,
     [length(Solved), NumberPuzzles, Filename,
-     TotalTime, Min, Max, Avg, Hz].
+     TotalTime, Avg, Hz, Max, Min].
 
 solve_file(Filename, Seperator) ->
     Solutions = solve_all(from_file(Filename, Seperator)),
