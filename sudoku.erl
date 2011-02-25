@@ -67,9 +67,9 @@ eliminate(ValuesDict, [Square|T], Digits) ->
 eliminate(ValuesDict, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     ValuesDict;
-eliminate(ValuesDict, Square, Digits, NewValues, OldValues) ->
+eliminate(ValuesDict, Square, Digits, NewValues, _) ->
     NewDict1 = dict:store(Square, NewValues, ValuesDict),
-    NewDict2 = peer_eliminate(NewDict1, Square, NewValues, OldValues),
+    NewDict2 = peer_eliminate(NewDict1, Square, NewValues),
 
     %% Digits have been eliminated from this Square.
     %% Now see if the elimination has created a unique place for a digit
@@ -98,13 +98,13 @@ assign_unique_place_for_digit(ValuesDict, _, _) ->
     %% Mutlitple palces (or none) found for Digit
     ValuesDict.
 
-peer_eliminate(ValuesDict, Square, [AssignedValue], _) ->
+peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
     Peers = peers(Square),
     eliminate(ValuesDict, Peers, [AssignedValue]);
 
-peer_eliminate(ValuesDict, _, _, _) ->
+peer_eliminate(ValuesDict, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     ValuesDict.
 
