@@ -2,12 +2,12 @@
 -import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2]).
 -compile(export_all).
 
-print_results(FileName, Seperator) ->
-    Solutions = solve_file(FileName, Seperator),
+print_results(Filename, Seperator) ->
+    Solutions = solve_file(Filename, Seperator),
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (min ~f, max ~f, avg ~f (~f Hz))~n",
-    io:format(Msg, time_stats(Solutions, FileName)).
+    io:format(Msg, time_stats(Solutions, Filename)).
 
-time_stats(Solutions, FileName) ->
+time_stats(Solutions, Filename) ->
     Solved = filter(fun({_, Dict}) -> is_solved(Dict) end, Solutions),
     NumberPuzzles = length(Solutions),
     Times = [Time|| {Time, _} <- Solutions],
@@ -16,25 +16,25 @@ time_stats(Solutions, FileName) ->
     TotalTime = lists:sum(Times)/1000000,
     Avg = TotalTime/NumberPuzzles,
     Hz = NumberPuzzles/TotalTime,
-    [length(Solved), NumberPuzzles, FileName,
+    [length(Solved), NumberPuzzles, Filename,
      TotalTime, Min, Max, Avg, Hz].
 
-solve_file(FileName, Seperator) ->
-    Solutions = solve_all(from_file(FileName, Seperator)),
-    OutFileName = [filename:basename(FileName, ".txt")|".out"],
-    ok = to_file(OutFileName, Solutions),
+solve_file(Filename, Seperator) ->
+    Solutions = solve_all(from_file(Filename, Seperator)),
+    OutFilename = [filename:basename(Filename, ".txt")|".out"],
+    ok = to_file(OutFilename, Solutions),
     Solutions.
 
 solve_all(GridList) ->
     map(fun time_solve/1, GridList).
 
-from_file(FileName, Seperator) ->
-    {ok, BinData} = file:read_file(FileName),
+from_file(Filename, Seperator) ->
+    {ok, BinData} = file:read_file(Filename),
     string:tokens(binary_to_list(BinData), Seperator).
 
-to_file(FileName, Solutions) ->
+to_file(Filename, Solutions) ->
     GridStrings = map(fun({_, S}) -> [to_string(S)|"\n"] end, Solutions),
-    ok = file:write_file(FileName, list_to_binary(GridStrings)).
+    ok = file:write_file(Filename, list_to_binary(GridStrings)).
 
 is_solved(ValuesDict) ->
     all(fun(Unit) -> is_unit_solved(ValuesDict, Unit) end, unitlist()).
