@@ -64,6 +64,9 @@ eliminate(ValuesDict, [Square|T], Digits) ->
     NewDict = eliminate(ValuesDict, Square, Digits, NewValues, OldValues),
     eliminate(NewDict, T, Digits).
 
+eliminate(_, _, _, [], _) ->
+    %% Contradiction: removed last value
+    false;
 eliminate(ValuesDict, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     ValuesDict;

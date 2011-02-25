@@ -112,11 +112,18 @@ test_eliminate() ->
     ValuesDict = eliminate(empty_dict(), ["A2"], "3"),
     "12456789" = dict:fetch("A2", ValuesDict),
     "2457" = dict:fetch("A2", eliminate(ValuesDict, ["A2"], "13689")),
+
+    %% Eliminating the last value from a square should indicate an error
+    false = eliminate(ValuesDict, ["A2"], digits()),
     ok.
 
 test_assign() ->
     ValuesDict = assign(empty_dict(), "A2", $1),
     "1" = dict:fetch("A2", ValuesDict),
+
+    %% Assigning a different value to an already assigned square should
+    %% indicate an error.
+    false = assign(ValuesDict, "A2", $3),
     ok.
 
 test_assign_eliminates_from_peers() ->
