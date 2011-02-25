@@ -4,7 +4,7 @@
 
 print_results(FileName, Seperator) ->
     Solutions = solve_file(FileName, Seperator),
-    Msg = "Solved ~p of ~p puzzles from ~s in ~p secs (min ~p, max ~p, avg ~p (~p Hz))~n",
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (min ~f, max ~f, avg ~f (~f Hz))~n",
     io:format(Msg, time_stats(Solutions, FileName)).
 
 time_stats(Solutions, FileName) ->
