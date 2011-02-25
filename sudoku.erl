@@ -76,6 +76,15 @@ eliminate(ValuesDict, Square, Digits, NewValues, _) ->
     %% to live in the surrounding units of this Square.
     assign_unique_place(NewDict2, units(Square), Digits).
 
+peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
+    %% If there is only one value left, we can also
+    %% eliminate that value from the peers of Square
+    Peers = peers(Square),
+    eliminate(ValuesDict, Peers, [AssignedValue]);
+peer_eliminate(ValuesDict, _, _) ->
+    %% Multiple values, cannot eliminate from peers.
+    ValuesDict.
+
 assign_unique_place(ValuesDict, [], _) ->
     ValuesDict;
 assign_unique_place(ValuesDict, [Unit|T], Digits) ->
@@ -96,16 +105,6 @@ assign_unique_place_for_digit(ValuesDict, [Square], Digit) ->
     assign(ValuesDict, Square, Digit);
 assign_unique_place_for_digit(ValuesDict, _, _) ->
     %% Mutlitple palces (or none) found for Digit
-    ValuesDict.
-
-peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
-    %% If there is only one value left, we can also
-    %% eliminate that value from the peers of Square
-    Peers = peers(Square),
-    eliminate(ValuesDict, Peers, [AssignedValue]);
-
-peer_eliminate(ValuesDict, _, _) ->
-    %% Multiple values, cannot eliminate from peers.
     ValuesDict.
 
 places_for_value(ValuesDict, Unit, Digit) ->
