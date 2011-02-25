@@ -79,8 +79,7 @@ eliminate(ValuesDict, Square, Digits, NewValues, _) ->
 peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
-    Peers = peers(Square),
-    eliminate(ValuesDict, Peers, [AssignedValue]);
+    eliminate(ValuesDict, peers(Square), [AssignedValue]);
 peer_eliminate(ValuesDict, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     ValuesDict.
