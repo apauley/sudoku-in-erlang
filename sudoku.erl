@@ -52,7 +52,7 @@ solve(GridString) ->
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
-    OtherValues = lists:delete(Digit, dict:fetch(Square, ValuesDict)),
+    OtherValues = exclude_from(dict:fetch(Square, ValuesDict), [Digit]),
     eliminate(ValuesDict, [Square], OtherValues).
 
 eliminate(ValuesDict, [], _) ->
@@ -60,7 +60,7 @@ eliminate(ValuesDict, [], _) ->
 eliminate(ValuesDict, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
     OldValues = dict:fetch(Square, ValuesDict),
-    NewValues = filter(fun(E) -> not member(E, Digits) end, OldValues),
+    NewValues = exclude_from(OldValues, Digits),
     NewDict = eliminate(ValuesDict, Square, Digits, NewValues, OldValues),
     eliminate(NewDict, T, Digits).
 
@@ -189,3 +189,6 @@ peers(Square) ->
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->
     H ++ shallow_flatten(T).
+
+exclude_from(Values, Exluders) ->
+    filter(fun(E) -> not member(E, Exluders) end, Values).
