@@ -5,8 +5,15 @@
 print_results(FileName, Seperator) ->
     Solutions = solve_file(FileName, Seperator),
     Solved = filter(fun({_, Dict}) -> is_solved(Dict) end, Solutions),
-    io:format("Solved ~p of ~p puzzles from ~s~n",
-              [length(Solved), length(Solutions), FileName]).
+    Times = [Time|| {Time, _} <- Solutions],
+    Max = lists:max(Times)/1000000,
+    Min = lists:min(Times)/1000000,
+    TotalTime = lists:sum(Times)/1000000,
+    Avg = TotalTime/length(Solutions),
+    Msg = "Solved ~p of ~p puzzles from ~s in ~p secs (min ~p, max ~p, avg ~p)~n",
+    io:format(Msg,
+              [length(Solved), length(Solutions), FileName,
+               TotalTime, Min, Max, Avg]).
 
 solve_file(FileName, Seperator) ->
     solve_all(from_file(FileName, Seperator)).
