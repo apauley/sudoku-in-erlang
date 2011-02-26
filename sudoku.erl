@@ -58,8 +58,7 @@ search(ValuesDict, true) ->
     %% Searching an already solved puzzle should just return it unharmed.
     ValuesDict;
 search(ValuesDict, false) ->
-    Square = least_valued_unassigned_square(ValuesDict),
-    Values = dict:fetch(Square, ValuesDict),
+    {Square, Values} = least_valued_unassigned_square(ValuesDict),
     Results = [search(assign(ValuesDict, Square, Digit))||Digit <- Values],
     first_value(Results).
 
@@ -135,11 +134,11 @@ places_for_value(ValuesDict, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
 
 least_valued_unassigned_square(ValuesDict) ->
-    Lengths = map(fun({S, Values}) -> {length(Values), S} end,
+    Lengths = map(fun({S, Values}) -> {length(Values), S, Values} end,
                   dict:to_list(ValuesDict)),
-    Unassigned = filter(fun({Length, _}) -> Length > 1 end, Lengths),
-    {_, Square} = lists:min(Unassigned),
-    Square.
+    Unassigned = filter(fun({Length, _, _}) -> Length > 1 end, Lengths),
+    {_, Square, Values} = lists:min(Unassigned),
+    {Square, Values}.
 
 to_string(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];

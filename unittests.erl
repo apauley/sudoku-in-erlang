@@ -117,10 +117,10 @@ test_least_valued_unassigned_square() ->
     %% A1 should not be considered, it's already assigned.
     ValuesDict = assign(eliminate(empty_dict(), ["A2"], "234"), "A1", $1),
     false = is_solved(ValuesDict),
-    "A2" = least_valued_unassigned_square(ValuesDict),
+    {"A2", _} = least_valued_unassigned_square(ValuesDict),
 
     %% Any square can be returned when all values are equally unassigned
-    "A1" = least_valued_unassigned_square(empty_dict()),
+    {"A1", _} = least_valued_unassigned_square(empty_dict()),
     ok.
 
 test_eliminate() ->
