@@ -2,7 +2,8 @@
 -import(lists, [all/2, member/2]).
 -import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
-                 unitlist/0, units/1, peers/1, least_valued_unassigned_square/1,
+                 unitlist/0, units/1, peers/1, search/1,
+                 least_valued_unassigned_square/1,
                  clean_grid/1, is_solved/1, time_solve/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
@@ -21,6 +22,8 @@ test() ->
     ok = test_parse_grid(),
     ok = test_least_valued_unassigned_square(),
     ok = test_eliminate(),
+    ok = test_search_bails_out_early(),
+    ok = test_search_solves_grid(),
     ok = test_assign(),
     ok = test_assign_eliminates_from_peers(),
     ok = test_recursive_peer_elimination(),
@@ -132,6 +135,22 @@ test_eliminate() ->
     false = eliminate(ValuesDict, ["A2"], digits()),
     ok.
 
+test_search_bails_out_early() ->
+    %% Searching an already solved puzzle should just return it unharmed.
+    true = solved_dict() =:= search(solved_dict()),
+
+    %% Searching a previous failure should return the same failure
+    false = search(false),
+    ok.
+
+test_search_solves_grid() ->
+    GridString = "4.....8.5.3..........7......2...
+..6.....8.4......1.......6.3.7.5..2.....1.4......",
+    ValuesDict = parse_grid(GridString),
+    false = is_solved(ValuesDict),
+    true = is_solved(search(ValuesDict)),
+    ok.
+
 test_assign() ->
     ValuesDict = assign(empty_dict(), "A2", $1),
     "1" = dict:fetch("A2", ValuesDict),
@@ -189,7 +208,8 @@ test_is_solved() ->
     ok.
 
 test_time_solve() ->
-    GridString = ".45.81376........................................................................",
+    GridString = "4.....8.5.3..........7......2...
+..6.....8.4......1.......6.3.7.5..2.....1.4......",
     {MicroSeconds, Dict} = time_solve(GridString),
     true = is_integer(MicroSeconds),
     true = is_sudoku_dict(Dict),

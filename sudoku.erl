@@ -48,13 +48,28 @@ time_solve(GridString) ->
     timer:tc(sudoku, solve, [GridString]).
 
 solve(GridString) ->
-    parse_grid(GridString).
+    search(parse_grid(GridString)).
+
+search(false) ->
+    false;
+search(ValuesDict) ->
+    search(ValuesDict, is_solved(ValuesDict)).
+search(ValuesDict, true) ->
+    %% Searching an already solved puzzle should just return it unharmed.
+    ValuesDict;
+search(ValuesDict, false) ->
+    Square = least_valued_unassigned_square(ValuesDict),
+    Values = dict:fetch(Square, ValuesDict),
+    Results = [search(assign(ValuesDict, Square, Digit))||Digit <- Values],
+    first_value(Results).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
     OtherValues = exclude_from(dict:fetch(Square, ValuesDict), [Digit]),
     eliminate(ValuesDict, [Square], OtherValues).
 
+eliminate(false, _, _) ->
+    false;
 eliminate(ValuesDict, [], _) ->
     ValuesDict;
 eliminate(ValuesDict, [Square|T], Digits) ->
@@ -87,6 +102,8 @@ peer_eliminate(ValuesDict, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     ValuesDict.
 
+assign_unique_place(false, _, _) ->
+    false;
 assign_unique_place(ValuesDict, [], _) ->
     ValuesDict;
 assign_unique_place(ValuesDict, [Unit|T], Digits) ->
@@ -95,6 +112,8 @@ assign_unique_place(ValuesDict, [Unit|T], Digits) ->
     NewDict = assign_unique_place_for_unit(ValuesDict, Unit, Digits),
     assign_unique_place(NewDict, T, Digits).
 
+assign_unique_place_for_unit(false, _, _) ->
+    false;
 assign_unique_place_for_unit(ValuesDict, _, []) ->
     ValuesDict;
 assign_unique_place_for_unit(ValuesDict, Unit, [Digit|T]) ->
@@ -102,6 +121,9 @@ assign_unique_place_for_unit(ValuesDict, Unit, [Digit|T]) ->
     NewDict = assign_unique_place_for_digit(ValuesDict, Places, Digit),
     assign_unique_place_for_unit(NewDict, Unit, T).
 
+assign_unique_place_for_digit(_, [], _) ->
+    %% Contradiction: no place for Digit found
+    false;
 assign_unique_place_for_digit(ValuesDict, [Square], Digit) ->
     %% Unique place for Digit found, assign
     assign(ValuesDict, Square, Digit);
@@ -207,3 +229,13 @@ shallow_flatten([H|T]) ->
 
 exclude_from(Values, Exluders) ->
     filter(fun(E) -> not member(E, Exluders) end, Values).
+
+%% Returns the first non-false value, otherwise false
+first_value([]) ->
+    false;
+first_value([H|T]) ->
+    first_value(H, T).
+first_value(false, T) ->
+    first_value(T);
+first_value(H, _) ->
+    H.
