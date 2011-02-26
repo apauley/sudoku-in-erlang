@@ -135,12 +135,6 @@ places_for_value(ValuesDict, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
 
 least_valued_unassigned_square(ValuesDict) ->
-    least_valued_unassigned_square(ValuesDict, is_solved(ValuesDict)).
-least_valued_unassigned_square(_, true) ->
-    %% It does not make sense to call this on a solved puzzle
-    false;
-least_valued_unassigned_square(ValuesDict, false) ->
-    %% Return the unassigned square with the fewest possible values
     Lengths = map(fun({S, Values}) -> {length(Values), S} end,
                   dict:to_list(ValuesDict)),
     Unassigned = filter(fun({Length, _}) -> Length > 1 end, Lengths),

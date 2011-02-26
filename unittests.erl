@@ -121,9 +121,6 @@ test_least_valued_unassigned_square() ->
 
     %% Any square can be returned when all values are equally unassigned
     "A1" = least_valued_unassigned_square(empty_dict()),
-
-    %% It does not make sense to call this on a solved puzzle
-    false = least_valued_unassigned_square(solved_dict()),
     ok.
 
 test_eliminate() ->
