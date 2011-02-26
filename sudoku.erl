@@ -59,8 +59,7 @@ search(ValuesDict, true) ->
     ValuesDict;
 search(ValuesDict, false) ->
     {Square, Values} = least_valued_unassigned_square(ValuesDict),
-    Results = [search(assign(ValuesDict, Square, Digit))||Digit <- Values],
-    first_value(Results).
+    first_valid_result(ValuesDict, Square, Values).
 
 assign(ValuesDict, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
@@ -223,12 +222,14 @@ shallow_flatten([H|T]) ->
 exclude_from(Values, Exluders) ->
     filter(fun(E) -> not member(E, Exluders) end, Values).
 
-%% Returns the first non-false value, otherwise false
-first_value([]) ->
+%% Returns the first non-false puzzle, otherwise false
+first_valid_result(_, _, []) ->
     false;
-first_value([H|T]) ->
-    first_value(H, T).
-first_value(false, T) ->
-    first_value(T);
-first_value(H, _) ->
-    H.
+first_valid_result(ValuesDict, Square, [Digit|T]) ->
+    DictOrFalse = search(assign(ValuesDict, Square, Digit)),
+    first_valid_result(ValuesDict, Square, [Digit|T], DictOrFalse).
+first_valid_result(ValuesDict, Square, [_|T], false) ->
+    first_valid_result(ValuesDict, Square, T);
+first_valid_result(_, _, _, Dict) ->
+    Dict.
+
