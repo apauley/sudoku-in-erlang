@@ -112,6 +112,14 @@ assign_unique_place_for_digit(ValuesDict, _, _) ->
 places_for_value(ValuesDict, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
 
+least_valued_unassigned_square(ValuesDict) ->
+    %% Return the unassigned square with the fewest possible values
+    Lengths = map(fun({S, Values}) -> {length(Values), S} end,
+                  dict:to_list(ValuesDict)),
+    Unassigned = filter(fun({Length, _}) -> Length > 1 end, Lengths),
+    {_, Square} = lists:min(Unassigned),
+    Square.
+
 to_string(ValuesDict) ->
     Fun = fun({_, [V]}) -> [V];
              ({_, _}) -> "."

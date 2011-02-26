@@ -2,7 +2,7 @@
 -import(lists, [all/2, member/2]).
 -import(sudoku, [cross/2, digits/0,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
-                 unitlist/0, units/1, peers/1,
+                 unitlist/0, units/1, peers/1, least_valued_unassigned_square/1,
                  clean_grid/1, is_solved/1, time_solve/1,
                  empty_dict/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
@@ -19,6 +19,7 @@ test() ->
     ok = test_empty_dict(),
     ok = test_clean_grid(),
     ok = test_parse_grid(),
+    ok = test_least_valued_unassigned_square(),
     ok = test_eliminate(),
     ok = test_assign(),
     ok = test_assign_eliminates_from_peers(),
@@ -106,6 +107,13 @@ test_parse_grid() ->
     %% A parsed grid will already have eliminated the values of some squares
     ParsedDict = parse_grid(GridString),
     "4" = dict:fetch("F2", ParsedDict),
+    ok.
+
+test_least_valued_unassigned_square() ->
+    %% Assign something to A1 and eliminate another from A2.
+    %% A1 should not be considered, it's already assigned.
+    ValuesDict = assign(eliminate(empty_dict(), ["A2"], "234"), "A1", $1),
+    "A2" = least_valued_unassigned_square(ValuesDict),
     ok.
 
 test_eliminate() ->
