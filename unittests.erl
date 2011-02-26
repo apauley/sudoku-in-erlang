@@ -113,7 +113,14 @@ test_least_valued_unassigned_square() ->
     %% Assign something to A1 and eliminate another from A2.
     %% A1 should not be considered, it's already assigned.
     ValuesDict = assign(eliminate(empty_dict(), ["A2"], "234"), "A1", $1),
+    false = is_solved(ValuesDict),
     "A2" = least_valued_unassigned_square(ValuesDict),
+
+    %% Any square can be returned when all values are equally unassigned
+    "A1" = least_valued_unassigned_square(empty_dict()),
+
+    %% It does not make sense to call this on a solved puzzle
+    false = least_valued_unassigned_square(solved_dict()),
     ok.
 
 test_eliminate() ->
@@ -177,9 +184,7 @@ test_places_for_value() ->
     ok.
 
 test_is_solved() ->
-    GridString = "417369825632158947958724316825437169791586432346912758289643571573291684164875293",
-    SolvedDict = parse_grid(GridString),
-    true = is_solved(SolvedDict),
+    true = is_solved(solved_dict()),
     false = is_solved(empty_dict()),
     ok.
 
@@ -198,6 +203,11 @@ test_to_string() ->
 
 is_sudoku_dict(ValuesDict) ->
     lists:sort(dict:fetch_keys(ValuesDict)) == squares().
+
+solved_dict() ->
+    GridString = "41736982563215894795872431682543
+7169791586432346912758289643571573291684164875293",
+    parse_grid(GridString).
 
 allTrue(Booleans) ->
     %% Test support function:
