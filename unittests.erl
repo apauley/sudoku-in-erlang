@@ -5,7 +5,7 @@
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1,
                  clean_grid/1, is_solved/1, time_solve/1,
-                 empty_dict/0, parse_grid/1, eliminate/3, assign/3,
+                 empty_puzzle/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
 -export([test/0]).
 
@@ -17,7 +17,7 @@ test() ->
     ok = test_unitlist(),
     ok = test_units(),
     ok = test_peers(),
-    ok = test_empty_dict(),
+    ok = test_empty_puzzle(),
     ok = test_clean_grid(),
     ok = test_parse_grid(),
     ok = test_least_valued_unassigned_square(),
@@ -79,8 +79,9 @@ test_peers() ->
                [peers(Square) || Square <- squares()]),
     ok.
 
-test_empty_dict() ->
-    ValuesDict = empty_dict(),
+test_empty_puzzle() ->
+    {ValuesDict, Eliminations} = empty_puzzle(),
+    0 = Eliminations,
     true = is_sudoku_dict(ValuesDict),
 
     %% The values of all keys should start with all possible values.
@@ -115,16 +116,16 @@ test_parse_grid() ->
 test_least_valued_unassigned_square() ->
     %% Assign something to A1 and eliminate another from A2.
     %% A1 should not be considered, it's already assigned.
-    Puzzle = assign(eliminate({empty_dict(), 0}, ["A2"], "234"), "A1", $1),
+    Puzzle = assign(eliminate(empty_puzzle(), ["A2"], "234"), "A1", $1),
     false = is_solved(Puzzle),
     {"A2", _} = least_valued_unassigned_square(Puzzle),
 
     %% Any square can be returned when all values are equally unassigned
-    {"A1", _} = least_valued_unassigned_square({empty_dict(), 0}),
+    {"A1", _} = least_valued_unassigned_square(empty_puzzle()),
     ok.
 
 test_eliminate() ->
-    Puzzle = eliminate({empty_dict(), 0}, ["A2"], "3"),
+    Puzzle = eliminate(empty_puzzle(), ["A2"], "3"),
     {ValuesDict, _} = Puzzle,
     "12456789" = dict:fetch("A2", ValuesDict),
     {NewDict, _} = eliminate(Puzzle, ["A2"], "13689"),
@@ -151,7 +152,7 @@ test_search_solves_grid() ->
     ok.
 
 test_assign() ->
-    Puzzle = assign({empty_dict(), 0}, "A2", $1),
+    Puzzle = assign(empty_puzzle(), "A2", $1),
     {ValuesDict, _} = Puzzle,
     "1" = dict:fetch("A2", ValuesDict),
 
@@ -161,8 +162,9 @@ test_assign() ->
     ok.
 
 test_assign_eliminates_from_peers() ->
-    NonPeerValues = dict:fetch("D1", empty_dict()),
-    Puzzle = assign({empty_dict(), 0}, "A3", $7),
+    {EmptyDict, 0} = empty_puzzle(),
+    NonPeerValues = dict:fetch("D1", EmptyDict),
+    Puzzle = assign(empty_puzzle(), "A3", $7),
     {ValuesDict, _} = Puzzle,
 
     %% Now 7 may not be a possible value in any of A3's peers
@@ -175,7 +177,7 @@ test_assign_eliminates_from_peers() ->
 
 test_recursive_peer_elimination() ->
     %% Eliminate all but two values from a peer of A3:
-    SetupPuzzle = eliminate({empty_dict(), 0}, ["A2"], "2345689"),
+    SetupPuzzle = eliminate(empty_puzzle(), ["A2"], "2345689"),
     {SetupDict, _} = SetupPuzzle,
     "17" = dict:fetch("A2", SetupDict),
 
@@ -211,7 +213,7 @@ test_places_for_value() ->
 
 test_is_solved() ->
     true = is_solved(solved_puzzle()),
-    false = is_solved({empty_dict(), 0}),
+    false = is_solved(empty_puzzle()),
     ok.
 
 test_time_solve() ->

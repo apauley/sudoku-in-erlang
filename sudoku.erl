@@ -152,7 +152,7 @@ to_string(Puzzle) ->
 parse_grid(GridString) ->
     CleanGrid = clean_grid(GridString),
     81 = length(CleanGrid),
-    parse_puzzle({empty_dict(), 0}, squares(), CleanGrid).
+    parse_puzzle(empty_puzzle(), squares(), CleanGrid).
 
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
@@ -175,6 +175,8 @@ assign_if_digit(Puzzle, _, _, false) ->
     %% Not possible to assign
     Puzzle.
 
+empty_puzzle() ->
+    {empty_dict(), 0}.
 empty_dict() ->
     Digits = digits(),
     dict:from_list([{Square, Digits} || Square <- squares()]).
