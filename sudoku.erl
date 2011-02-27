@@ -52,14 +52,14 @@ solve(GridString) ->
 
 search(false) ->
     false;
-search(ValuesTuple) ->
-    search(ValuesTuple, is_solved(ValuesTuple)).
-search(ValuesTuple, true) ->
+search(Puzzle) ->
+    search(Puzzle, is_solved(Puzzle)).
+search(Puzzle, true) ->
     %% Searching an already solved puzzle should just return it unharmed.
-    ValuesTuple;
-search(ValuesTuple, false) ->
-    {Square, Values} = least_valued_unassigned_square(ValuesTuple),
-    first_valid_result(ValuesTuple, Square, Values).
+    Puzzle;
+search(Puzzle, false) ->
+    {Square, Values} = least_valued_unassigned_square(Puzzle),
+    first_valid_result(Puzzle, Square, Values).
 
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
