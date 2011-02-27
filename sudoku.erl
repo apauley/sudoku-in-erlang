@@ -5,20 +5,21 @@
 print_results(Filename, Seperator) ->
     Solutions = solve_file(Filename, Seperator),
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs
-\t(avg ~f sec (~f Hz) max ~f secs, min ~f secs)~n",
+\t(avg ~f sec (~f Hz) max ~f secs, min ~f secs, ~p eliminations)~n",
     io:format(Msg, time_stats(Solutions, Filename)).
 
 time_stats(Solutions, Filename) ->
-    Solved = filter(fun({_, Dict}) -> is_solved(Dict) end, Solutions),
+    Solved = filter(fun({_, Tuple}) -> is_solved(Tuple) end, Solutions),
     NumberPuzzles = length(Solutions),
     Times = [Time|| {Time, _} <- Solutions],
+    Eliminations = [E|| {_, {_, E}} <- Solutions],
     Max = lists:max(Times)/1000000,
     Min = lists:min(Times)/1000000,
     TotalTime = lists:sum(Times)/1000000,
     Avg = TotalTime/NumberPuzzles,
     Hz = NumberPuzzles/TotalTime,
     [length(Solved), NumberPuzzles, Filename,
-     TotalTime, Avg, Hz, Max, Min].
+     TotalTime, Avg, Hz, Max, Min, lists:sum(Eliminations)].
 
 solve_file(Filename, Seperator) ->
     Solutions = solve_all(from_file(Filename, Seperator)),
@@ -37,9 +38,8 @@ to_file(Filename, Solutions) ->
     GridStrings = map(fun({_, S}) -> [to_string(S)|"\n"] end, Solutions),
     ok = file:write_file(Filename, list_to_binary(GridStrings)).
 
-is_solved(ValuesDict) ->
+is_solved({ValuesDict, _}) ->
     all(fun(Unit) -> is_unit_solved(ValuesDict, Unit) end, unitlist()).
-
 is_unit_solved(ValuesDict, Unit) ->
     UnitValues = flatmap(fun(S) -> dict:fetch(S, ValuesDict) end, Unit),
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
@@ -52,94 +52,98 @@ solve(GridString) ->
 
 search(false) ->
     false;
-search(ValuesDict) ->
-    search(ValuesDict, is_solved(ValuesDict)).
-search(ValuesDict, true) ->
+search(ValuesTuple) ->
+    search(ValuesTuple, is_solved(ValuesTuple)).
+search(ValuesTuple, true) ->
     %% Searching an already solved puzzle should just return it unharmed.
-    ValuesDict;
-search(ValuesDict, false) ->
-    {Square, Values} = least_valued_unassigned_square(ValuesDict),
-    first_valid_result(ValuesDict, Square, Values).
+    ValuesTuple;
+search(ValuesTuple, false) ->
+    {Square, Values} = least_valued_unassigned_square(ValuesTuple),
+    first_valid_result(ValuesTuple, Square, Values).
 
-assign(ValuesDict, Square, Digit) ->
+assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
+    {ValuesDict, _} = Puzzle,
     OtherValues = exclude_from(dict:fetch(Square, ValuesDict), [Digit]),
-    eliminate(ValuesDict, [Square], OtherValues).
+    eliminate(Puzzle, [Square], OtherValues).
 
 eliminate(false, _, _) ->
     false;
-eliminate(ValuesDict, [], _) ->
-    ValuesDict;
-eliminate(ValuesDict, [Square|T], Digits) ->
+eliminate(Puzzle, [], _) ->
+    Puzzle;
+eliminate(Puzzle, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
+    {ValuesDict, _} = Puzzle,
     OldValues = dict:fetch(Square, ValuesDict),
     NewValues = exclude_from(OldValues, Digits),
-    NewDict = eliminate(ValuesDict, Square, Digits, NewValues, OldValues),
-    eliminate(NewDict, T, Digits).
+    NewPuzzle = eliminate(Puzzle, Square, Digits, NewValues, OldValues),
+    eliminate(NewPuzzle, T, Digits).
 
 eliminate(_, _, _, [], _) ->
     %% Contradiction: removed last value
     false;
-eliminate(ValuesDict, _, _, Vs, Vs) ->
+eliminate(Puzzle, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
-    ValuesDict;
-eliminate(ValuesDict, Square, Digits, NewValues, _) ->
-    NewDict1 = dict:store(Square, NewValues, ValuesDict),
-    NewDict2 = peer_eliminate(NewDict1, Square, NewValues),
+    Puzzle;
+eliminate({ValuesDict, Eliminations}, Square, Digits, NewValues, _) ->
+    NewDict = dict:store(Square, NewValues, ValuesDict),
+    NewPuzzle = peer_eliminate({NewDict, Eliminations}, Square, NewValues),
 
     %% Digits have been eliminated from this Square.
     %% Now see if the elimination has created a unique place for a digit
     %% to live in the surrounding units of this Square.
-    assign_unique_place(NewDict2, units(Square), Digits).
+    assign_unique_place(NewPuzzle, units(Square), Digits).
 
-peer_eliminate(ValuesDict, Square, [AssignedValue]) ->
+peer_eliminate(Puzzle, Square, [AssignedValue]) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
-    eliminate(ValuesDict, peers(Square), [AssignedValue]);
-peer_eliminate(ValuesDict, _, _) ->
+    eliminate(Puzzle, peers(Square), [AssignedValue]);
+peer_eliminate(Puzzle, _, _) ->
     %% Multiple values, cannot eliminate from peers.
-    ValuesDict.
+    Puzzle.
 
 assign_unique_place(false, _, _) ->
     false;
-assign_unique_place(ValuesDict, [], _) ->
-    ValuesDict;
-assign_unique_place(ValuesDict, [Unit|T], Digits) ->
+assign_unique_place(Puzzle, [], _) ->
+    Puzzle;
+assign_unique_place(Puzzle, [Unit|T], Digits) ->
     %% If a certain digit can only be in one place in a unit,
     %% assign it.
-    NewDict = assign_unique_place_for_unit(ValuesDict, Unit, Digits),
-    assign_unique_place(NewDict, T, Digits).
+    NewPuzzle = assign_unique_place_for_unit(Puzzle, Unit, Digits),
+    assign_unique_place(NewPuzzle, T, Digits).
 
 assign_unique_place_for_unit(false, _, _) ->
     false;
-assign_unique_place_for_unit(ValuesDict, _, []) ->
-    ValuesDict;
-assign_unique_place_for_unit(ValuesDict, Unit, [Digit|T]) ->
+assign_unique_place_for_unit(Puzzle, _, []) ->
+    Puzzle;
+assign_unique_place_for_unit(Puzzle, Unit, [Digit|T]) ->
+    {ValuesDict, _} = Puzzle,
     Places = places_for_value(ValuesDict, Unit, Digit),
-    NewDict = assign_unique_place_for_digit(ValuesDict, Places, Digit),
-    assign_unique_place_for_unit(NewDict, Unit, T).
+    NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
+    assign_unique_place_for_unit(NewPuzzle, Unit, T).
 
 assign_unique_place_for_digit(_, [], _) ->
     %% Contradiction: no place for Digit found
     false;
-assign_unique_place_for_digit(ValuesDict, [Square], Digit) ->
+assign_unique_place_for_digit(Puzzle, [Square], Digit) ->
     %% Unique place for Digit found, assign
-    assign(ValuesDict, Square, Digit);
-assign_unique_place_for_digit(ValuesDict, _, _) ->
+    assign(Puzzle, Square, Digit);
+assign_unique_place_for_digit(Puzzle, _, _) ->
     %% Mutlitple palces (or none) found for Digit
-    ValuesDict.
+    Puzzle.
 
 places_for_value(ValuesDict, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
 
-least_valued_unassigned_square(ValuesDict) ->
+least_valued_unassigned_square({ValuesDict, _}) ->
     Lengths = map(fun({S, Values}) -> {length(Values), S, Values} end,
                   dict:to_list(ValuesDict)),
     Unassigned = filter(fun({Length, _, _}) -> Length > 1 end, Lengths),
     {_, Square, Values} = lists:min(Unassigned),
     {Square, Values}.
 
-to_string(ValuesDict) ->
+to_string(Puzzle) ->
+    {ValuesDict, _} = Puzzle,
     Fun = fun({_, [V]}) -> [V];
              ({_, _}) -> "."
           end,
@@ -148,26 +152,28 @@ to_string(ValuesDict) ->
 parse_grid(GridString) ->
     CleanGrid = clean_grid(GridString),
     81 = length(CleanGrid),
-    parsed_dict(empty_dict(), squares(), CleanGrid).
+    parse_puzzle({empty_dict(), 0}, squares(), CleanGrid).
 
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
     ValidChars = digits() ++ "0.",
     filter(fun(E) -> member(E, ValidChars) end, GridString).
 
-parsed_dict(ValuesDict, [], []) ->
-    ValuesDict;
-parsed_dict(ValuesDict, [Square|Squares], [Value|GridString]) ->
+parse_puzzle(Puzzle, [], []) ->
+    Puzzle;
+parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
+    {_,_} = Puzzle,
     IsDigit = member(Value, digits()),
-    NewDict = assign_if_digit(ValuesDict, Square, Value, IsDigit),
-    parsed_dict(NewDict, Squares, GridString).
+    NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
+    {_,_} = NewPuzzle,
+    parse_puzzle(NewPuzzle, Squares, GridString).
 
-assign_if_digit(ValuesDict, Square, Value, true) ->
+assign_if_digit(Puzzle, Square, Value, true) ->
     %% Value is a Digit, possible to assign
-    assign(ValuesDict, Square, Value);
-assign_if_digit(ValuesDict, _, _, false) ->
+    assign(Puzzle, Square, Value);
+assign_if_digit(Puzzle, _, _, false) ->
     %% Not possible to assign
-    ValuesDict.
+    Puzzle.
 
 empty_dict() ->
     Digits = digits(),
@@ -225,11 +231,10 @@ exclude_from(Values, Exluders) ->
 %% Returns the first non-false puzzle, otherwise false
 first_valid_result(_, _, []) ->
     false;
-first_valid_result(ValuesDict, Square, [Digit|T]) ->
-    DictOrFalse = search(assign(ValuesDict, Square, Digit)),
-    first_valid_result(ValuesDict, Square, [Digit|T], DictOrFalse).
-first_valid_result(ValuesDict, Square, [_|T], false) ->
-    first_valid_result(ValuesDict, Square, T);
-first_valid_result(_, _, _, Dict) ->
-    Dict.
-
+first_valid_result(Puzzle, Square, [Digit|T]) ->
+    PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
+    first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
+first_valid_result(Puzzle, Square, [_|T], false) ->
+    first_valid_result(Puzzle, Square, T);
+first_valid_result(_, _, _, Puzzle) ->
+    Puzzle.
