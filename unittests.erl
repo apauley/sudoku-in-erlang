@@ -1,6 +1,6 @@
 -module(unittests).
 -import(lists, [all/2, member/2, sort/1]).
--import(sudoku, [cross/2, digits/0,
+-import(sudoku, [cross/2, digits/0, values/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1,
@@ -80,15 +80,16 @@ test_peers() ->
     ok.
 
 test_empty_puzzle() ->
-    {ValuesDict, Eliminations} = empty_puzzle(),
+    Puzzle = empty_puzzle(),
+    {_, Eliminations} = Puzzle,
     0 = Eliminations,
-    true = is_sudoku_dict(ValuesDict),
+    true = is_sudoku_puzzle(Puzzle),
 
     %% The values of all keys should start with all possible values.
     Squares = squares(),
     Digits = digits(),
     true = all(fun(Values) -> Values == Digits end,
-               [dict:fetch(Square, ValuesDict) || Square <- Squares]),
+               [values(Puzzle, Square) || Square <- Squares]),
     ok.
 
 test_clean_grid() ->
@@ -109,8 +110,8 @@ test_parse_grid() ->
 1.4......",
 
     %% A parsed grid will already have eliminated the values of some squares
-    {ParsedDict, _} = parse_grid(GridString),
-    "4" = dict:fetch("F2", ParsedDict),
+    Puzzle = parse_grid(GridString),
+    "4" = values(Puzzle, "F2"),
     ok.
 
 test_least_valued_unassigned_square() ->
@@ -126,10 +127,9 @@ test_least_valued_unassigned_square() ->
 
 test_eliminate() ->
     Puzzle = eliminate(empty_puzzle(), ["A2"], "3"),
-    {ValuesDict, _} = Puzzle,
-    "12456789" = dict:fetch("A2", ValuesDict),
-    {NewDict, _} = eliminate(Puzzle, ["A2"], "13689"),
-    "2457" = dict:fetch("A2", NewDict),
+    "12456789" = values(Puzzle, "A2"),
+    NewPuzzle = eliminate(Puzzle, ["A2"], "13689"),
+    "2457" = values(NewPuzzle, "A2"),
 
     %% Eliminating the last value from a square should indicate an error
     false = eliminate(Puzzle, ["A2"], digits()),
@@ -153,8 +153,7 @@ test_search_solves_grid() ->
 
 test_assign() ->
     Puzzle = assign(empty_puzzle(), "A2", $1),
-    {ValuesDict, _} = Puzzle,
-    "1" = dict:fetch("A2", ValuesDict),
+    "1" = values(Puzzle, "A2"),
 
     %% Assigning a different value to an already assigned square should
     %% indicate an error.
@@ -162,31 +161,27 @@ test_assign() ->
     ok.
 
 test_assign_eliminates_from_peers() ->
-    {EmptyDict, 0} = empty_puzzle(),
-    NonPeerValues = dict:fetch("D1", EmptyDict),
+    NonPeerValues = values(empty_puzzle(), "D1"),
     Puzzle = assign(empty_puzzle(), "A3", $7),
-    {ValuesDict, _} = Puzzle,
 
     %% Now 7 may not be a possible value in any of A3's peers
-    Fun = fun(Square) -> not (member($7, dict:fetch(Square, ValuesDict))) end,
+    Fun = fun(Square) -> not (member($7, values(Puzzle, Square))) end,
     true = all(Fun, peers("A3")),
 
     %% After assignment, the non-peers remain unchanged:
-    NonPeerValues = dict:fetch("D1", ValuesDict),
+    NonPeerValues = values(Puzzle, "D1"),
     ok.
 
 test_recursive_peer_elimination() ->
     %% Eliminate all but two values from a peer of A3:
     SetupPuzzle = eliminate(empty_puzzle(), ["A2"], "2345689"),
-    {SetupDict, _} = SetupPuzzle,
-    "17" = dict:fetch("A2", SetupDict),
+    "17" = values(SetupPuzzle, "A2"),
 
     %% Assigning one of the above two values in A3 should trigger
     %% peer elimination in A2 as well.
     Puzzle = assign(SetupPuzzle, "A3", $7),
-    {ValuesDict, _} = Puzzle,
-    "1" = dict:fetch("A2", ValuesDict),
-    Fun = fun(Square) -> not (member($1, dict:fetch(Square, ValuesDict))) end,
+    "1" = values(Puzzle, "A2"),
+    Fun = fun(Square) -> not (member($1, values(Puzzle, Square))) end,
     true = all(Fun, peers("A2")),
     ok.
 
@@ -195,20 +190,18 @@ test_automatically_assign_unique_places() ->
     GridString = ".....3.17.15..9..8.6.......1....
 7.....9...2.....5....4.......2.5..6..34.34.2.....",
     Puzzle = parse_grid(GridString),
-    {ValuesDict, _} = Puzzle,
-    "2" = dict:fetch("C9", ValuesDict),
+    "2" = values(Puzzle, "C9"),
     ok.
 
 test_places_for_value() ->
     GridString = ".45.81376.......................
 .................................................",
     Puzzle = parse_grid(GridString),
-    {ValuesDict, _} = Puzzle,
-    "29" = dict:fetch("A1", ValuesDict),
-    "29" = dict:fetch("A4", ValuesDict),
+    "29" = values(Puzzle, "A1"),
+    "29" = values(Puzzle, "A4"),
     Unit = ["A1","A2","A3","A4","A5","A6","A7","A8","A9"],
-    ["A1","A4"] = places_for_value(ValuesDict, Unit, $9),
-    ["A1","A4"] = places_for_value(ValuesDict, Unit, $2),
+    ["A1","A4"] = places_for_value(Puzzle, Unit, $9),
+    ["A1","A4"] = places_for_value(Puzzle, Unit, $2),
     ok.
 
 test_is_solved() ->

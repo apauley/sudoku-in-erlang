@@ -38,10 +38,10 @@ to_file(Filename, Solutions) ->
     GridStrings = map(fun({_, S}) -> [to_string(S)|"\n"] end, Solutions),
     ok = file:write_file(Filename, list_to_binary(GridStrings)).
 
-is_solved({ValuesDict, _}) ->
-    all(fun(Unit) -> is_unit_solved(ValuesDict, Unit) end, unitlist()).
-is_unit_solved(ValuesDict, Unit) ->
-    UnitValues = flatmap(fun(S) -> dict:fetch(S, ValuesDict) end, Unit),
+is_solved(Puzzle) ->
+    all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
+is_unit_solved(Puzzle, Unit) ->
+    UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
 time_solve(GridString) ->
@@ -63,8 +63,7 @@ search(ValuesTuple, false) ->
 
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
-    {ValuesDict, _} = Puzzle,
-    OtherValues = exclude_from(dict:fetch(Square, ValuesDict), [Digit]),
+    OtherValues = exclude_from(values(Puzzle, Square), [Digit]),
     eliminate(Puzzle, [Square], OtherValues).
 
 eliminate(false, _, _) ->
@@ -73,8 +72,7 @@ eliminate(Puzzle, [], _) ->
     Puzzle;
 eliminate(Puzzle, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
-    {ValuesDict, _} = Puzzle,
-    OldValues = dict:fetch(Square, ValuesDict),
+    OldValues = values(Puzzle, Square),
     NewValues = exclude_from(OldValues, Digits),
     NewPuzzle = eliminate(Puzzle, Square, Digits, NewValues, OldValues),
     eliminate(NewPuzzle, T, Digits).
@@ -117,8 +115,7 @@ assign_unique_place_for_unit(false, _, _) ->
 assign_unique_place_for_unit(Puzzle, _, []) ->
     Puzzle;
 assign_unique_place_for_unit(Puzzle, Unit, [Digit|T]) ->
-    {ValuesDict, _} = Puzzle,
-    Places = places_for_value(ValuesDict, Unit, Digit),
+    Places = places_for_value(Puzzle, Unit, Digit),
     NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
     assign_unique_place_for_unit(NewPuzzle, Unit, T).
 
@@ -132,8 +129,8 @@ assign_unique_place_for_digit(Puzzle, _, _) ->
     %% Mutlitple palces (or none) found for Digit
     Puzzle.
 
-places_for_value(ValuesDict, Unit, Digit) ->
-    [Square||Square <- Unit, member(Digit, dict:fetch(Square, ValuesDict))].
+places_for_value(Puzzle, Unit, Digit) ->
+    [Square||Square <- Unit, member(Digit, values(Puzzle, Square))].
 
 least_valued_unassigned_square({ValuesDict, _}) ->
     Lengths = map(fun({S, Values}) -> {length(Values), S, Values} end,
@@ -191,6 +188,10 @@ rows() ->
     "ABCDEFGHI".
 cols() ->
     digits().
+
+values(Puzzle, Square) ->
+    {Dict, _} = Puzzle,
+    dict:fetch(Square, Dict).
 
 squares() ->
     %% Returns a list of 81 square names, including "A1" etc.
