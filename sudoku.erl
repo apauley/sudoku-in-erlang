@@ -70,8 +70,9 @@ eliminate(false, _, _) ->
     false;
 eliminate(Puzzle, [], _) ->
     Puzzle;
-eliminate(Puzzle, [Square|T], Digits) ->
+eliminate({Dict, Eliminations}, [Square|T], Digits) ->
     %% Eliminate the specified Digits from all specified Squares.
+    Puzzle = {Dict, Eliminations+1},
     OldValues = values(Puzzle, Square),
     NewValues = exclude_from(OldValues, Digits),
     NewPuzzle = eliminate(Puzzle, Square, Digits, NewValues, OldValues),
