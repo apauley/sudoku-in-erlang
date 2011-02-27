@@ -67,7 +67,7 @@ search(Puzzle, false) ->
 
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
-    OtherValues = exclude_from(values(Puzzle, Square), [Digit]),
+    OtherValues = exclude_from(values(Puzzle, Square), Digit),
     eliminate_digits(Puzzle, Square, OtherValues).
 
 eliminate_digits({false, E}, _, _) ->
@@ -86,7 +86,7 @@ eliminate({Dict, Eliminations}, [Square|T], Digit) ->
     %% Eliminate the specified Digit from all specified Squares.
     Puzzle = {Dict, Eliminations+1},
     OldValues = values(Puzzle, Square),
-    NewValues = exclude_from(OldValues, [Digit]),
+    NewValues = exclude_from(OldValues, Digit),
     NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues, OldValues),
     eliminate(NewPuzzle, T, Digit).
 
@@ -233,8 +233,8 @@ shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->
     H ++ shallow_flatten(T).
 
-exclude_from(Values, Exluders) ->
-    filter(fun(E) -> not member(E, Exluders) end, Values).
+exclude_from(Values, Digit) ->
+    lists:delete(Digit, Values).
 
 %% Returns the first non-false puzzle, otherwise false
 first_valid_result({_, E}, _, []) ->
