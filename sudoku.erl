@@ -11,11 +11,11 @@ print_results(Filename, Seperator) ->
 time_stats(Solutions, Filename) ->
     Solved = filter(fun({_, Tuple}) -> is_solved(Tuple) end, Solutions),
     NumberPuzzles = length(Solutions),
-    Times = [Time|| {Time, _} <- Solutions],
+    Times = [Time/1000000|| {Time, _} <- Solutions],
     Eliminations = [E|| {_, {_, E}} <- Solutions],
-    Max = lists:max(Times)/1000000,
-    Min = lists:min(Times)/1000000,
-    TotalTime = lists:sum(Times)/1000000,
+    Max = lists:max(Times),
+    Min = lists:min(Times),
+    TotalTime = lists:sum(Times),
     Avg = TotalTime/NumberPuzzles,
     Hz = NumberPuzzles/TotalTime,
     [length(Solved), NumberPuzzles, Filename,
@@ -58,7 +58,7 @@ is_unit_solved(Puzzle, Unit) ->
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
 time_solve(GridString) ->
-    timer:tc(sudoku, solve, [GridString]).
+    timer:tc(fun solve/1, [GridString]).
 
 solve(GridString) ->
     search(parse_grid(GridString)).
