@@ -1,25 +1,14 @@
 -module(sudoku).
--import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2]).
+-import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2, sum/1]).
 -compile(export_all).
 
 print_results(Filename, Seperator) ->
-    Solutions = solve_file(Filename, Seperator),
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs
-\t(avg ~f sec (~f Hz) max ~f secs, min ~f secs, ~p eliminations)~n",
-    io:format(Msg, time_stats(Solutions, Filename)).
-
-time_stats(Solutions, Filename) ->
-    Solved = filter(fun({_, Tuple}) -> is_solved(Tuple) end, Solutions),
-    NumberPuzzles = length(Solutions),
-    Times = [Time/1000000|| {Time, _} <- Solutions],
-    Eliminations = [E|| {_, {_, E}} <- Solutions],
-    Max = lists:max(Times),
-    Min = lists:min(Times),
-    TotalTime = lists:sum(Times),
-    Avg = TotalTime/NumberPuzzles,
-    Hz = NumberPuzzles/TotalTime,
-    [length(Solved), NumberPuzzles, Filename,
-     TotalTime, Avg, Hz, Max, Min, lists:sum(Eliminations)].
+    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
+    Solved = filter(fun({_, Puzzle}) -> is_solved(Puzzle) end, Solutions),
+    Eliminations = sum([E|| {_, {_, E}} <- Solutions]),
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~p eliminations)~n",
+    io:format(Msg,
+              [length(Solved), length(Solutions), Filename, Time/1000000, Eliminations]).
 
 solve_file(Filename, Seperator) ->
     Solutions = solve_all(from_file(Filename, Seperator)),
@@ -58,7 +47,7 @@ is_unit_solved(Puzzle, Unit) ->
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
 time_solve(GridString) ->
-    timer:tc(fun solve/1, [GridString]).
+    timer:tc(sudoku, solve, [GridString]).
 
 solve(GridString) ->
     search(parse_grid(GridString)).
