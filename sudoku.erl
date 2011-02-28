@@ -29,19 +29,18 @@ solve_file(Filename, Seperator) ->
 
 solve_all(GridList) ->
     PidGrids = [{spawn(fun server/0), Grid}|| Grid <- GridList],
-    Pids = [Pid || {Pid, _} <- PidGrids],
     map(fun({Pid, Grid}) -> Pid ! {self(), solve, Grid} end, PidGrids),
-    map(fun receiveSolution/1, Pids).
+    map(fun receiveSolution/1, PidGrids).
 
-receiveSolution(Pid) ->
+receiveSolution({Pid, Grid}) ->
     receive
-        {Pid, Puzzle} -> Puzzle
+        {Pid, Grid, Solution} -> Solution
     end.
 
 server() ->
     receive
         {From, solve, GridString} ->
-            From ! {self(), time_solve(GridString)}
+            From ! {self(), GridString, time_solve(GridString)}
     end.
 
 from_file(Filename, Seperator) ->
