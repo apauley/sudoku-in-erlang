@@ -54,8 +54,8 @@ is_unit_solved(Puzzle, Unit) ->
 solve(GridString) ->
     search(parse_grid(GridString)).
 
-search(false) ->
-    false;
+search({false, E}) ->
+    {false, E};
 search(Puzzle) ->
     search(Puzzle, is_solved(Puzzle)).
 search(Puzzle, true) ->
@@ -70,8 +70,8 @@ assign(Puzzle, Square, Digit) ->
     OtherValues = exclude_from(values(Puzzle, Square), [Digit]),
     eliminate(Puzzle, [Square], OtherValues).
 
-eliminate(false, _, _) ->
-    false;
+eliminate({false, E}, _, _) ->
+    {false, E};
 eliminate(Puzzle, [], _) ->
     Puzzle;
 eliminate({Dict, Eliminations}, [Square|T], Digits) ->
@@ -82,9 +82,9 @@ eliminate({Dict, Eliminations}, [Square|T], Digits) ->
     NewPuzzle = eliminate(Puzzle, Square, Digits, NewValues, OldValues),
     eliminate(NewPuzzle, T, Digits).
 
-eliminate(_, _, _, [], _) ->
+eliminate({_, E}, _, _, [], _) ->
     %% Contradiction: removed last value
-    false;
+    {false, E};
 eliminate(Puzzle, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     Puzzle;
@@ -105,8 +105,8 @@ peer_eliminate(Puzzle, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     Puzzle.
 
-assign_unique_place(false, _, _) ->
-    false;
+assign_unique_place({false, E}, _, _) ->
+    {false, E};
 assign_unique_place(Puzzle, [], _) ->
     Puzzle;
 assign_unique_place(Puzzle, [Unit|T], Digits) ->
@@ -115,8 +115,8 @@ assign_unique_place(Puzzle, [Unit|T], Digits) ->
     NewPuzzle = assign_unique_place_for_unit(Puzzle, Unit, Digits),
     assign_unique_place(NewPuzzle, T, Digits).
 
-assign_unique_place_for_unit(false, _, _) ->
-    false;
+assign_unique_place_for_unit({false, E}, _, _) ->
+    {false, E};
 assign_unique_place_for_unit(Puzzle, _, []) ->
     Puzzle;
 assign_unique_place_for_unit(Puzzle, Unit, [Digit|T]) ->
@@ -124,9 +124,9 @@ assign_unique_place_for_unit(Puzzle, Unit, [Digit|T]) ->
     NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
     assign_unique_place_for_unit(NewPuzzle, Unit, T).
 
-assign_unique_place_for_digit(_, [], _) ->
+assign_unique_place_for_digit({_, E}, [], _) ->
     %% Contradiction: no place for Digit found
-    false;
+    {false, E};
 assign_unique_place_for_digit(Puzzle, [Square], Digit) ->
     %% Unique place for Digit found, assign
     assign(Puzzle, Square, Digit);
@@ -237,12 +237,12 @@ exclude_from(Values, Exluders) ->
     filter(fun(E) -> not member(E, Exluders) end, Values).
 
 %% Returns the first non-false puzzle, otherwise false
-first_valid_result(_, _, []) ->
-    false;
+first_valid_result({_, E}, _, []) ->
+    {false, E};
 first_valid_result(Puzzle, Square, [Digit|T]) ->
     PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
     first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
-first_valid_result(Puzzle, Square, [_|T], false) ->
-    first_valid_result(Puzzle, Square, T);
+first_valid_result({Dict, Elim}, Square, [_|T], {false, E}) ->
+    first_valid_result({Dict, Elim+(E-Elim)}, Square, T);
 first_valid_result(_, _, _, Puzzle) ->
     Puzzle.

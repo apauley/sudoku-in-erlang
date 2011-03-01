@@ -131,7 +131,7 @@ test_eliminate() ->
     "2457" = values(NewPuzzle, "A2"),
 
     %% Eliminating the last value from a square should indicate an error
-    false = eliminate(Puzzle, ["A2"], digits()),
+    {false, _} = eliminate(Puzzle, ["A2"], digits()),
     ok.
 
 test_search_bails_out_early() ->
@@ -139,7 +139,7 @@ test_search_bails_out_early() ->
     true = solved_puzzle() =:= search(solved_puzzle()),
 
     %% Searching a previous failure should return the same failure
-    false = search(false),
+    {false, 1} = search({false, 1}),
     ok.
 
 test_search_solves_grid() ->
@@ -156,7 +156,7 @@ test_assign() ->
 
     %% Assigning a different value to an already assigned square should
     %% indicate an error.
-    false = assign(Puzzle, "A2", $3),
+    {false, _} = assign(Puzzle, "A2", $3),
     ok.
 
 test_assign_eliminates_from_peers() ->
