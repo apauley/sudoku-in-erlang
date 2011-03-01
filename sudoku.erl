@@ -4,8 +4,8 @@
 
 print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
-    Solved = filter(fun({_, Puzzle}) -> is_solved(Puzzle) end, Solutions),
-    Eliminations = sum([E|| {_, {_, E}} <- Solutions]),
+    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
+    Eliminations = sum([E|| {_, E} <- Solutions]),
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~p eliminations)~n",
     io:format(Msg,
               [length(Solved), length(Solutions), Filename, Time/1000000, Eliminations]).
@@ -29,7 +29,7 @@ receiveSolution({Pid, Grid}) ->
 server() ->
     receive
         {From, solve, GridString} ->
-            From ! {self(), GridString, time_solve(GridString)}
+            From ! {self(), GridString, solve(GridString)}
     end.
 
 from_file(Filename, Seperator) ->
@@ -37,7 +37,7 @@ from_file(Filename, Seperator) ->
     string:tokens(binary_to_list(BinData), Seperator).
 
 to_file(Filename, Solutions) ->
-    GridStrings = map(fun({_, S}) -> [to_string(S)|"\n"] end, Solutions),
+    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
     ok = file:write_file(Filename, list_to_binary(GridStrings)).
 
 is_solved(Puzzle) ->
@@ -45,9 +45,6 @@ is_solved(Puzzle) ->
 is_unit_solved(Puzzle, Unit) ->
     UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
     (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
-
-time_solve(GridString) ->
-    timer:tc(sudoku, solve, [GridString]).
 
 solve(GridString) ->
     search(parse_grid(GridString)).

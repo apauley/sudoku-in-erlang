@@ -4,7 +4,7 @@
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1,
-                 clean_grid/1, is_solved/1, time_solve/1,
+                 clean_grid/1, is_solved/1,
                  empty_puzzle/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
 -export([test/0]).
@@ -30,7 +30,6 @@ test() ->
     ok = test_automatically_assign_unique_places(),
     ok = test_places_for_value(),
     ok = test_is_solved(),
-    ok = test_time_solve(),
     ok = test_to_string(),
     ok.
 
@@ -207,14 +206,6 @@ test_places_for_value() ->
 test_is_solved() ->
     true = is_solved(solved_puzzle()),
     false = is_solved(empty_puzzle()),
-    ok.
-
-test_time_solve() ->
-    GridString = "4.....8.5.3..........7......2...
-..6.....8.4......1.......6.3.7.5..2.....1.4......",
-    {MicroSeconds, Puzzle} = time_solve(GridString),
-    true = is_integer(MicroSeconds),
-    true = is_sudoku_puzzle(Puzzle),
     ok.
 
 test_to_string() ->
