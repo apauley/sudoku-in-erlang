@@ -5,10 +5,15 @@
 print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
     Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
+    TimeInSeconds = Time/1000000,
+    NumberPuzzles = length(Solutions),
+    Hz = NumberPuzzles/TimeInSeconds,
     Eliminations = sum([E|| {_, E} <- Solutions]),
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~p eliminations)~n",
+    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
     io:format(Msg,
-              [length(Solved), length(Solutions), Filename, Time/1000000, Eliminations]).
+              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
+               Eliminations, EliminationsPerPuzzle]).
 
 solve_file(Filename, Seperator) ->
     Solutions = solve_all(from_file(Filename, Seperator)),
