@@ -120,17 +120,9 @@ assign_unique_place(Puzzle, [], _) ->
 assign_unique_place(Puzzle, [Unit|T], Digit) ->
     %% If a certain digit can only be in one place in a unit,
     %% assign it.
-    NewPuzzle = assign_unique_place_for_unit(Puzzle, Unit, [Digit]),
-    assign_unique_place(NewPuzzle, T, Digit).
-
-assign_unique_place_for_unit({false, E}, _, _) ->
-    {false, E};
-assign_unique_place_for_unit(Puzzle, _, []) ->
-    Puzzle;
-assign_unique_place_for_unit(Puzzle, Unit, [Digit|T]) ->
     Places = places_for_value(Puzzle, Unit, Digit),
     NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
-    assign_unique_place_for_unit(NewPuzzle, Unit, T).
+    assign_unique_place(NewPuzzle, T, Digit).
 
 assign_unique_place_for_digit({_, E}, [], _) ->
     %% Contradiction: no place for Digit found
