@@ -75,20 +75,20 @@ eliminate_digits({false, E}, _, _) ->
 eliminate_digits(Puzzle, _, []) ->
     Puzzle;
 eliminate_digits(Puzzle, Square, [Digit|T]) ->
-    PuzzleOrFalse = eliminate(Puzzle, [Square], [Digit]),
+    PuzzleOrFalse = eliminate(Puzzle, [Square], Digit),
     eliminate_digits(PuzzleOrFalse, Square, T).
 
 eliminate({false, E}, _, _) ->
     {false, E};
 eliminate(Puzzle, [], _) ->
     Puzzle;
-eliminate({Dict, Eliminations}, [Square|T], Digits) ->
-    %% Eliminate the specified Digits from all specified Squares.
+eliminate({Dict, Eliminations}, [Square|T], Digit) ->
+    %% Eliminate the specified Digit from all specified Squares.
     Puzzle = {Dict, Eliminations+1},
     OldValues = values(Puzzle, Square),
-    NewValues = exclude_from(OldValues, Digits),
-    NewPuzzle = eliminate(Puzzle, Square, Digits, NewValues, OldValues),
-    eliminate(NewPuzzle, T, Digits).
+    NewValues = exclude_from(OldValues, [Digit]),
+    NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues, OldValues),
+    eliminate(NewPuzzle, T, Digit).
 
 eliminate({_, E}, _, _, [], _) ->
     %% Contradiction: removed last value
@@ -96,19 +96,19 @@ eliminate({_, E}, _, _, [], _) ->
 eliminate(Puzzle, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     Puzzle;
-eliminate({ValuesDict, Eliminations}, Square, Digits, NewValues, _) ->
+eliminate({ValuesDict, Eliminations}, Square, Digit, NewValues, _) ->
     NewDict = dict:store(Square, NewValues, ValuesDict),
     NewPuzzle = peer_eliminate({NewDict, Eliminations}, Square, NewValues),
 
-    %% Digits have been eliminated from this Square.
+    %% Digit have been eliminated from this Square.
     %% Now see if the elimination has created a unique place for a digit
     %% to live in the surrounding units of this Square.
-    assign_unique_place(NewPuzzle, units(Square), Digits).
+    assign_unique_place(NewPuzzle, units(Square), Digit).
 
 peer_eliminate(Puzzle, Square, [AssignedValue]) ->
     %% If there is only one value left, we can also
     %% eliminate that value from the peers of Square
-    eliminate(Puzzle, peers(Square), [AssignedValue]);
+    eliminate(Puzzle, peers(Square), AssignedValue);
 peer_eliminate(Puzzle, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     Puzzle.
@@ -117,11 +117,11 @@ assign_unique_place({false, E}, _, _) ->
     {false, E};
 assign_unique_place(Puzzle, [], _) ->
     Puzzle;
-assign_unique_place(Puzzle, [Unit|T], Digits) ->
+assign_unique_place(Puzzle, [Unit|T], Digit) ->
     %% If a certain digit can only be in one place in a unit,
     %% assign it.
-    NewPuzzle = assign_unique_place_for_unit(Puzzle, Unit, Digits),
-    assign_unique_place(NewPuzzle, T, Digits).
+    NewPuzzle = assign_unique_place_for_unit(Puzzle, Unit, [Digit]),
+    assign_unique_place(NewPuzzle, T, Digit).
 
 assign_unique_place_for_unit({false, E}, _, _) ->
     {false, E};

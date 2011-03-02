@@ -4,7 +4,7 @@
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1,
-                 clean_grid/1, is_solved/1,
+                 clean_grid/1, is_solved/1, eliminate_digits/3,
                  empty_puzzle/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
 -export([test/0]).
@@ -116,7 +116,7 @@ test_parse_grid() ->
 test_least_valued_unassigned_square() ->
     %% Assign something to A1 and eliminate another from A2.
     %% A1 should not be considered, it's already assigned.
-    Puzzle = assign(eliminate(empty_puzzle(), ["A2"], "234"), "A1", $1),
+    Puzzle = assign(eliminate_digits(empty_puzzle(), "A2", "234"), "A1", $1),
     false = is_solved(Puzzle),
     {"A2", _} = least_valued_unassigned_square(Puzzle),
 
@@ -125,13 +125,13 @@ test_least_valued_unassigned_square() ->
     ok.
 
 test_eliminate() ->
-    Puzzle = eliminate(empty_puzzle(), ["A2"], "3"),
+    Puzzle = eliminate(empty_puzzle(), ["A2"], $3),
     "12456789" = values(Puzzle, "A2"),
-    NewPuzzle = eliminate(Puzzle, ["A2"], "13689"),
+    NewPuzzle = eliminate_digits(Puzzle, "A2", "13689"),
     "2457" = values(NewPuzzle, "A2"),
 
     %% Eliminating the last value from a square should indicate an error
-    {false, _} = eliminate(Puzzle, ["A2"], digits()),
+    {false, _} = eliminate_digits(Puzzle, "A2", digits()),
     ok.
 
 test_search_bails_out_early() ->
@@ -173,7 +173,7 @@ test_assign_eliminates_from_peers() ->
 
 test_recursive_peer_elimination() ->
     %% Eliminate all but two values from a peer of A3:
-    SetupPuzzle = eliminate(empty_puzzle(), ["A2"], "2345689"),
+    SetupPuzzle = eliminate_digits(empty_puzzle(), "A2", "2345689"),
     "17" = values(SetupPuzzle, "A2"),
 
     %% Assigning one of the above two values in A3 should trigger
@@ -211,7 +211,7 @@ test_is_solved() ->
 test_to_string() ->
     GridString = ".1736982563215894795872431682543
 7169791586432346912758289643571573291684164875293",
-    Puzzle = eliminate(parse_grid(GridString), ["A1"], "12356789"),
+    Puzzle = eliminate_digits(parse_grid(GridString), "A1", "12356789"),
     [$4|T] = to_string(Puzzle),
     [$.|T] = clean_grid(GridString),
     ok.
