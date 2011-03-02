@@ -68,7 +68,15 @@ search(Puzzle, false) ->
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
     OtherValues = exclude_from(values(Puzzle, Square), [Digit]),
-    eliminate(Puzzle, [Square], OtherValues).
+    eliminate_digits(Puzzle, Square, OtherValues).
+
+eliminate_digits({false, E}, _, _) ->
+    {false, E};
+eliminate_digits(Puzzle, _, []) ->
+    Puzzle;
+eliminate_digits(Puzzle, Square, [Digit|T]) ->
+    PuzzleOrFalse = eliminate(Puzzle, [Square], [Digit]),
+    eliminate_digits(PuzzleOrFalse, Square, T).
 
 eliminate({false, E}, _, _) ->
     {false, E};
