@@ -13,6 +13,6 @@ run_solver(["runtests"]) ->
     ok = unittests:test(),
     io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-    print_results("easy50.txt", "========"),
+    print_results("easy50.txt", "\n"),
     print_results("top95.txt", "\n"),
     print_results("hardest.txt", "\n").
