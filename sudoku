@@ -15,4 +15,6 @@ run_solver(["runtests"]) ->
 run_solver(["solve"]) ->
     print_results("easy50.txt", "\n"),
     print_results("top95.txt", "\n"),
-    print_results("hardest.txt", "\n").
+    print_results("hardest.txt", "\n");
+run_solver(["solve", Filename]) ->
+    print_results(Filename, "\n").
