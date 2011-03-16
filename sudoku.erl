@@ -8,7 +8,7 @@ print_results(Filename, Seperator) ->
     TimeInSeconds = Time/1000000,
     NumberPuzzles = length(Solutions),
     Hz = NumberPuzzles/TimeInSeconds,
-    Eliminations = sum([E|| {_, E} <- Solutions]),
+    Eliminations = sum([Count|| {_, Count} <- Solutions]),
     EliminationsPerPuzzle = Eliminations/NumberPuzzles,
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
     io:format(Msg,
@@ -54,8 +54,8 @@ is_unit_solved(Puzzle, Unit) ->
 solve(GridString) ->
     search(parse_grid(GridString)).
 
-search({false, E}) ->
-    {false, E};
+search({false, Count}) ->
+    {false, Count};
 search(Puzzle) ->
     search(Puzzle, is_solved(Puzzle)).
 search(Puzzle, true) ->
@@ -70,16 +70,16 @@ assign(Puzzle, Square, Digit) ->
     OtherValues = exclude_from(values(Puzzle, Square), Digit),
     eliminate_digits(Puzzle, Square, OtherValues).
 
-eliminate_digits({false, E}, _, _) ->
-    {false, E};
+eliminate_digits({false, Count}, _, _) ->
+    {false, Count};
 eliminate_digits(Puzzle, _, []) ->
     Puzzle;
 eliminate_digits(Puzzle, Square, [Digit|T]) ->
     PuzzleOrFalse = eliminate(Puzzle, [Square], Digit),
     eliminate_digits(PuzzleOrFalse, Square, T).
 
-eliminate({false, E}, _, _) ->
-    {false, E};
+eliminate({false, Count}, _, _) ->
+    {false, Count};
 eliminate(Puzzle, [], _) ->
     Puzzle;
 eliminate({Dict, Eliminations}, [Square|T], Digit) ->
@@ -90,9 +90,9 @@ eliminate({Dict, Eliminations}, [Square|T], Digit) ->
     NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues, OldValues),
     eliminate(NewPuzzle, T, Digit).
 
-eliminate({_, E}, _, _, [], _) ->
+eliminate({_, Count}, _, _, [], _) ->
     %% Contradiction: removed last value
-    {false, E};
+    {false, Count};
 eliminate(Puzzle, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     Puzzle;
@@ -113,8 +113,8 @@ peer_eliminate(Puzzle, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     Puzzle.
 
-assign_unique_place({false, E}, _, _) ->
-    {false, E};
+assign_unique_place({false, Count}, _, _) ->
+    {false, Count};
 assign_unique_place(Puzzle, [], _) ->
     Puzzle;
 assign_unique_place(Puzzle, [Unit|T], Digit) ->
@@ -124,9 +124,9 @@ assign_unique_place(Puzzle, [Unit|T], Digit) ->
     NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
     assign_unique_place(NewPuzzle, T, Digit).
 
-assign_unique_place_for_digit({_, E}, [], _) ->
+assign_unique_place_for_digit({_, Count}, [], _) ->
     %% Contradiction: no place for Digit found
-    {false, E};
+    {false, Count};
 assign_unique_place_for_digit(Puzzle, [Square], Digit) ->
     %% Unique place for Digit found, assign
     assign(Puzzle, Square, Digit);
@@ -237,12 +237,12 @@ exclude_from(Values, Digit) ->
     lists:delete(Digit, Values).
 
 %% Returns the first non-false puzzle, otherwise false
-first_valid_result({_, E}, _, []) ->
-    {false, E};
+first_valid_result({_, Count}, _, []) ->
+    {false, Count};
 first_valid_result(Puzzle, Square, [Digit|T]) ->
     PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
     first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
-first_valid_result({Dict, Elim}, Square, [_|T], {false, E}) ->
-    first_valid_result({Dict, Elim+(E-Elim)}, Square, T);
+first_valid_result({Dict, ValidCount}, Square, [_|T], {false, InvalidCount}) ->
+    first_valid_result({Dict, ValidCount+(InvalidCount-ValidCount)}, Square, T);
 first_valid_result(_, _, _, Puzzle) ->
     Puzzle.
