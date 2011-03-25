@@ -233,21 +233,22 @@ print_results(Filename, Seperator) ->
     Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
     TimeInSeconds = Time/1000000,
     Eliminations = [Count|| {_, Count} <- Solutions],
-    {Total, Avg, Max, Min, NumberPuzzles} = stats(Eliminations),
+    {Total, Avg, Med, Max, Min, NumberPuzzles} = stats(Eliminations),
     Hz = NumberPuzzles/TimeInSeconds,
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~.2f Hz)
-  (~p total eliminations, avg ~.2f, max ~p, min ~p)~n",
+  (~p total eliminations, avg ~.2f, median ~p, max ~p, min ~p)~n",
     io:format(Msg,
               [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
-               Total, Avg, Max, Min]).
+               Total, Avg, Med, Max, Min]).
 
 stats(List) ->
     Total = sum(List),
     Length = length(List),
     Avg = Total/Length,
+    Med = lists:nth(round((Length/2)), sort(List)),
     Max = lists:max(List),
     Min = lists:min(List),
-    {Total, Avg, Max, Min, Length}.
+    {Total, Avg, Med, Max, Min, Length}.
 
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->

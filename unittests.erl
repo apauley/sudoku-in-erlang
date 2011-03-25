@@ -218,9 +218,10 @@ test_to_string() ->
     ok.
 
 test_stats() ->
-    {Total, Avg, Max, Min, Length} = stats([2, 9, 4]),
+    {Total, Avg, Med, Max, Min, Length} = stats([2, 9, 4]),
     15 = Total,
     5.0 = Avg,
+    4 = Med,
     9 = Max,
     2 = Min,
     3 = Length,
