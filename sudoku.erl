@@ -17,10 +17,6 @@ squares() ->
     %% Returns a list of 81 square names, including "A1" etc.
     cross(rows(), cols()).
 
-values(Puzzle, Square) ->
-    {Dict, _} = Puzzle,
-    dict:fetch(Square, Dict).
-
 col_squares() ->
     %% All the square names for each column.
     [cross(rows(), [C]) || C <- cols()].
@@ -47,6 +43,11 @@ peers(Square) ->
     PeerSet = sets:from_list(NonUniquePeers),
     PeersWithSelf = sets:to_list(PeerSet),
     lists:delete(Square, PeersWithSelf).
+
+values(Puzzle, Square) ->
+    %% Returns the digit values for a given square
+    {Dict, _} = Puzzle,
+    dict:fetch(Square, Dict).
 
 parse_grid(GridString) ->
     CleanGrid = clean_grid(GridString),
