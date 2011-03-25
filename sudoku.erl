@@ -152,55 +152,6 @@ assign_unique_place_for_digit(Puzzle, _, _) ->
 places_for_value(Puzzle, Unit, Digit) ->
     [Square||Square <- Unit, member(Digit, values(Puzzle, Square))].
 
-print_results(Filename, Seperator) ->
-    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
-    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
-    TimeInSeconds = Time/1000000,
-    NumberPuzzles = length(Solutions),
-    Hz = NumberPuzzles/TimeInSeconds,
-    Eliminations = sum([Count|| {_, Count} <- Solutions]),
-    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
-    io:format(Msg,
-              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
-               Eliminations, EliminationsPerPuzzle]).
-
-solve_file(Filename, Seperator) ->
-    Solutions = solve_all(from_file(Filename, Seperator)),
-    OutFilename = [filename:basename(Filename, ".txt")|".out"],
-    ok = to_file(OutFilename, Solutions),
-    Solutions.
-
-solve_all(GridList) ->
-    PidGrids = [{spawn(fun server/0), Grid}|| Grid <- GridList],
-    map(fun({Pid, Grid}) -> Pid ! {self(), solve, Grid} end, PidGrids),
-    map(fun receiveSolution/1, PidGrids).
-
-receiveSolution({Pid, Grid}) ->
-    receive
-        {Pid, Grid, Solution} -> Solution
-    end.
-
-server() ->
-    receive
-        {From, solve, GridString} ->
-            From ! {self(), GridString, solve(GridString)}
-    end.
-
-from_file(Filename, Seperator) ->
-    {ok, BinData} = file:read_file(Filename),
-    string:tokens(binary_to_list(BinData), Seperator).
-
-to_file(Filename, Solutions) ->
-    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
-    ok = file:write_file(Filename, list_to_binary(GridStrings)).
-
-is_solved(Puzzle) ->
-    all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
-is_unit_solved(Puzzle, Unit) ->
-    UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
-    (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
-
 solve(GridString) ->
     search(parse_grid(GridString)).
 
@@ -232,6 +183,55 @@ least_valued_unassigned_square({ValuesDict, _}) ->
     Unassigned = filter(fun({Length, _, _}) -> Length > 1 end, Lengths),
     {_, Square, Values} = lists:min(Unassigned),
     {Square, Values}.
+
+solve_all(GridList) ->
+    PidGrids = [{spawn(fun server/0), Grid}|| Grid <- GridList],
+    map(fun({Pid, Grid}) -> Pid ! {self(), solve, Grid} end, PidGrids),
+    map(fun receiveSolution/1, PidGrids).
+
+receiveSolution({Pid, Grid}) ->
+    receive
+        {Pid, Grid, Solution} -> Solution
+    end.
+
+server() ->
+    receive
+        {From, solve, GridString} ->
+            From ! {self(), GridString, solve(GridString)}
+    end.
+
+print_results(Filename, Seperator) ->
+    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
+    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
+    TimeInSeconds = Time/1000000,
+    NumberPuzzles = length(Solutions),
+    Hz = NumberPuzzles/TimeInSeconds,
+    Eliminations = sum([Count|| {_, Count} <- Solutions]),
+    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
+    io:format(Msg,
+              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
+               Eliminations, EliminationsPerPuzzle]).
+
+solve_file(Filename, Seperator) ->
+    Solutions = solve_all(from_file(Filename, Seperator)),
+    OutFilename = [filename:basename(Filename, ".txt")|".out"],
+    ok = to_file(OutFilename, Solutions),
+    Solutions.
+
+from_file(Filename, Seperator) ->
+    {ok, BinData} = file:read_file(Filename),
+    string:tokens(binary_to_list(BinData), Seperator).
+
+to_file(Filename, Solutions) ->
+    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
+    ok = file:write_file(Filename, list_to_binary(GridStrings)).
+
+is_solved(Puzzle) ->
+    all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
+is_unit_solved(Puzzle, Unit) ->
+    UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
+    (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
 
 to_string(Puzzle) ->
     {ValuesDict, _} = Puzzle,
