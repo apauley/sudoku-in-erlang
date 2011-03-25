@@ -232,10 +232,9 @@ print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
     Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
     TimeInSeconds = Time/1000000,
-    NumberPuzzles = length(Solutions),
-    Hz = NumberPuzzles/TimeInSeconds,
     Eliminations = [Count|| {_, Count} <- Solutions],
-    {Total, Avg, Max, Min} = stats(Eliminations),
+    {Total, Avg, Max, Min, NumberPuzzles} = stats(Eliminations),
+    Hz = NumberPuzzles/TimeInSeconds,
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~.2f Hz)
   (~p total eliminations, avg ~.2f, max ~p, min ~p)~n",
     io:format(Msg,
@@ -244,10 +243,11 @@ print_results(Filename, Seperator) ->
 
 stats(List) ->
     Total = sum(List),
-    Avg = Total/length(List),
+    Length = length(List),
+    Avg = Total/Length,
     Max = lists:max(List),
     Min = lists:min(List),
-    {Total, Avg, Max, Min}.
+    {Total, Avg, Max, Min, Length}.
 
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->

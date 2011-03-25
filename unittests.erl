@@ -218,11 +218,12 @@ test_to_string() ->
     ok.
 
 test_stats() ->
-    {Total, Avg, Max, Min} = stats([2, 9, 4]),
+    {Total, Avg, Max, Min, Length} = stats([2, 9, 4]),
     15 = Total,
     5.0 = Avg,
     9 = Max,
     2 = Min,
+    3 = Length,
     ok.
 
 is_sudoku_puzzle(Puzzle) ->
