@@ -3,7 +3,7 @@
 -import(sudoku, [cross/2, digits/0, values/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1, search/1,
-                 least_valued_unassigned_square/1,
+                 least_valued_unassigned_square/1, stats/1,
                  clean_grid/1, is_solved/1, eliminate_digits/3,
                  empty_puzzle/0, parse_grid/1, eliminate/3, assign/3,
                  places_for_value/3, to_string/1]).
@@ -31,6 +31,7 @@ test() ->
     ok = test_places_for_value(),
     ok = test_is_solved(),
     ok = test_to_string(),
+    ok = test_stats(),
     ok.
 
 test_cross() ->
@@ -214,6 +215,14 @@ test_to_string() ->
     Puzzle = eliminate_digits(parse_grid(GridString), "A1", "12356789"),
     [$4|T] = to_string(Puzzle),
     [$.|T] = clean_grid(GridString),
+    ok.
+
+test_stats() ->
+    {Total, Avg, Max, Min} = stats([2, 9, 4]),
+    15 = Total,
+    5.0 = Avg,
+    9 = Max,
+    2 = Min,
     ok.
 
 is_sudoku_puzzle(Puzzle) ->

@@ -241,6 +241,13 @@ print_results(Filename, Seperator) ->
               [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
                Eliminations, EliminationsPerPuzzle]).
 
+stats(List) ->
+    Total = sum(List),
+    Avg = Total/length(List),
+    Max = lists:max(List),
+    Min = lists:min(List),
+    {Total, Avg, Max, Min}.
+
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->
     H ++ shallow_flatten(T).
