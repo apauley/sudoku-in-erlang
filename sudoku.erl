@@ -236,7 +236,7 @@ print_results(Filename, Seperator) ->
     {Total, Avg, Med, Max, Min, NumberPuzzles} = stats(Eliminations),
     Hz = NumberPuzzles/TimeInSeconds,
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~.2f Hz)
-  (~p total eliminations, avg ~.2f, median ~p, max ~p, min ~p)~n",
+  (~p total eliminations, avg ~.2f, median ~p, max ~p, min ~p).~n",
     io:format(Msg,
               [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
                Total, Avg, Med, Max, Min]).
