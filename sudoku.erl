@@ -215,6 +215,17 @@ search(Puzzle, false) ->
     {Square, Values} = least_valued_unassigned_square(Puzzle),
     first_valid_result(Puzzle, Square, Values).
 
+%% Returns the first valid puzzle, otherwise the last puzzle
+first_valid_result({_, Count}, _, []) ->
+    {false, Count};
+first_valid_result(Puzzle, Square, [Digit|T]) ->
+    PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
+    first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
+first_valid_result({Dict, ValidCount}, Square, [_|T], {false, InvalidCount}) ->
+    first_valid_result({Dict, ValidCount+(InvalidCount-ValidCount)}, Square, T);
+first_valid_result(_, _, _, Puzzle) ->
+    Puzzle.
+
 least_valued_unassigned_square({ValuesDict, _}) ->
     Lengths = map(fun({S, Values}) -> {length(Values), S, Values} end,
                   dict:to_list(ValuesDict)),
@@ -235,14 +246,3 @@ shallow_flatten([H|T]) ->
 
 exclude_from(Values, Digit) ->
     lists:delete(Digit, Values).
-
-%% Returns the first non-false puzzle, otherwise false
-first_valid_result({_, Count}, _, []) ->
-    {false, Count};
-first_valid_result(Puzzle, Square, [Digit|T]) ->
-    PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
-    first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
-first_valid_result({Dict, ValidCount}, Square, [_|T], {false, InvalidCount}) ->
-    first_valid_result({Dict, ValidCount+(InvalidCount-ValidCount)}, Square, T);
-first_valid_result(_, _, _, Puzzle) ->
-    Puzzle.
