@@ -234,12 +234,12 @@ print_results(Filename, Seperator) ->
     TimeInSeconds = Time/1000000,
     NumberPuzzles = length(Solutions),
     Hz = NumberPuzzles/TimeInSeconds,
-    Eliminations = sum([Count|| {_, Count} <- Solutions]),
-    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
+    Eliminations = [Count|| {_, Count} <- Solutions],
+    {Total, Avg, _, _} = stats(Eliminations),
     Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
     io:format(Msg,
               [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
-               Eliminations, EliminationsPerPuzzle]).
+               Total, Avg]).
 
 stats(List) ->
     Total = sum(List),
