@@ -200,33 +200,6 @@ server() ->
             From ! {self(), GridString, solve(GridString)}
     end.
 
-print_results(Filename, Seperator) ->
-    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
-    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
-    TimeInSeconds = Time/1000000,
-    NumberPuzzles = length(Solutions),
-    Hz = NumberPuzzles/TimeInSeconds,
-    Eliminations = sum([Count|| {_, Count} <- Solutions]),
-    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
-    io:format(Msg,
-              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
-               Eliminations, EliminationsPerPuzzle]).
-
-solve_file(Filename, Seperator) ->
-    Solutions = solve_all(from_file(Filename, Seperator)),
-    OutFilename = [filename:basename(Filename, ".txt")|".out"],
-    ok = to_file(OutFilename, Solutions),
-    Solutions.
-
-from_file(Filename, Seperator) ->
-    {ok, BinData} = file:read_file(Filename),
-    string:tokens(binary_to_list(BinData), Seperator).
-
-to_file(Filename, Solutions) ->
-    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
-    ok = file:write_file(Filename, list_to_binary(GridStrings)).
-
 is_solved(Puzzle) ->
     all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
 is_unit_solved(Puzzle, Unit) ->
@@ -239,6 +212,33 @@ to_string(Puzzle) ->
              ({_, _}) -> "."
           end,
     flatmap(Fun, sort(dict:to_list(ValuesDict))).
+
+from_file(Filename, Seperator) ->
+    {ok, BinData} = file:read_file(Filename),
+    string:tokens(binary_to_list(BinData), Seperator).
+
+to_file(Filename, Solutions) ->
+    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
+    ok = file:write_file(Filename, list_to_binary(GridStrings)).
+
+solve_file(Filename, Seperator) ->
+    Solutions = solve_all(from_file(Filename, Seperator)),
+    OutFilename = [filename:basename(Filename, ".txt")|".out"],
+    ok = to_file(OutFilename, Solutions),
+    Solutions.
+
+print_results(Filename, Seperator) ->
+    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
+    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
+    TimeInSeconds = Time/1000000,
+    NumberPuzzles = length(Solutions),
+    Hz = NumberPuzzles/TimeInSeconds,
+    Eliminations = sum([Count|| {_, Count} <- Solutions]),
+    EliminationsPerPuzzle = Eliminations/NumberPuzzles,
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~f Hz), ~p eliminations (~~~.2f per puzzle)~n",
+    io:format(Msg,
+              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
+               Eliminations, EliminationsPerPuzzle]).
 
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->
