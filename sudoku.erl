@@ -13,13 +13,13 @@ rows() ->
 cols() ->
     digits().
 
-values(Puzzle, Square) ->
-    {Dict, _} = Puzzle,
-    dict:fetch(Square, Dict).
-
 squares() ->
     %% Returns a list of 81 square names, including "A1" etc.
     cross(rows(), cols()).
+
+values(Puzzle, Square) ->
+    {Dict, _} = Puzzle,
+    dict:fetch(Square, Dict).
 
 col_squares() ->
     %% All the square names for each column.
