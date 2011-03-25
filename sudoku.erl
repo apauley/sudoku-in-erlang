@@ -48,6 +48,38 @@ peers(Square) ->
     PeersWithSelf = sets:to_list(PeerSet),
     lists:delete(Square, PeersWithSelf).
 
+parse_grid(GridString) ->
+    CleanGrid = clean_grid(GridString),
+    81 = length(CleanGrid),
+    parse_puzzle(empty_puzzle(), squares(), CleanGrid).
+
+clean_grid(GridString) ->
+    %% Return a string with only digits, 0 and .
+    ValidChars = digits() ++ "0.",
+    filter(fun(E) -> member(E, ValidChars) end, GridString).
+
+parse_puzzle(Puzzle, [], []) ->
+    Puzzle;
+parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
+    {_,_} = Puzzle,
+    IsDigit = member(Value, digits()),
+    NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
+    {_,_} = NewPuzzle,
+    parse_puzzle(NewPuzzle, Squares, GridString).
+
+assign_if_digit(Puzzle, Square, Value, true) ->
+    %% Value is a Digit, possible to assign
+    assign(Puzzle, Square, Value);
+assign_if_digit(Puzzle, _, _, false) ->
+    %% Not possible to assign
+    Puzzle.
+
+empty_puzzle() ->
+    {empty_dict(), 0}.
+empty_dict() ->
+    Digits = digits(),
+    dict:from_list([{Square, Digits} || Square <- squares()]).
+
 print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
     Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
@@ -196,38 +228,6 @@ to_string(Puzzle) ->
              ({_, _}) -> "."
           end,
     flatmap(Fun, sort(dict:to_list(ValuesDict))).
-
-parse_grid(GridString) ->
-    CleanGrid = clean_grid(GridString),
-    81 = length(CleanGrid),
-    parse_puzzle(empty_puzzle(), squares(), CleanGrid).
-
-clean_grid(GridString) ->
-    %% Return a string with only digits, 0 and .
-    ValidChars = digits() ++ "0.",
-    filter(fun(E) -> member(E, ValidChars) end, GridString).
-
-parse_puzzle(Puzzle, [], []) ->
-    Puzzle;
-parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
-    {_,_} = Puzzle,
-    IsDigit = member(Value, digits()),
-    NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
-    {_,_} = NewPuzzle,
-    parse_puzzle(NewPuzzle, Squares, GridString).
-
-assign_if_digit(Puzzle, Square, Value, true) ->
-    %% Value is a Digit, possible to assign
-    assign(Puzzle, Square, Value);
-assign_if_digit(Puzzle, _, _, false) ->
-    %% Not possible to assign
-    Puzzle.
-
-empty_puzzle() ->
-    {empty_dict(), 0}.
-empty_dict() ->
-    Digits = digits(),
-    dict:from_list([{Square, Digits} || Square <- squares()]).
 
 shallow_flatten([]) -> [];
 shallow_flatten([H|T]) ->
