@@ -1,6 +1,7 @@
 This is an Erlang version of a sudoku solver, mostly based on the
 solution by Peter Norvig.
-See http://norvig.com/sudoku.html
+For comparison, see my slightly modified version of Norvig's Python code:
+https://github.com/apauley/sudoku-by-norvig
 
 To try it out, simply run the sudoku script:
 $ ./sudoku
