@@ -2,8 +2,8 @@
 -import(sudoku, [print_results/2]).
 
 main(Args) ->
-    {ok, sudoku} = compile:file(sudoku),
-    {ok, unittests} = compile:file(unittests),
+    {ok, sudoku} = compile:file(sudoku, [native]),
+    {ok, unittests} = compile:file(unittests, [native]),
     run_solver(Args).
 
 run_solver([]) ->
