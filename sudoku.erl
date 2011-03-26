@@ -228,6 +228,8 @@ solve_file(Filename, Seperator) ->
     ok = to_file(OutFilename, Solutions),
     Solutions.
 
+print_results(Filename) ->
+    print_results(Filename, "\n").
 print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
     Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),

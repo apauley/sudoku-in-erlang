@@ -1,5 +1,5 @@
 #!/usr/bin/env escript
--import(sudoku, [print_results/2]).
+-import(sudoku, [print_results/1]).
 
 main(Args) ->
     {ok, sudoku} = compile:file(sudoku, [native]),
@@ -13,8 +13,8 @@ run_solver(["runtests"]) ->
     ok = unittests:test(),
     io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-    print_results("easy50.txt", "\n"),
-    print_results("top95.txt", "\n"),
-    print_results("hardest.txt", "\n");
+    print_results("easy50.txt"),
+    print_results("top95.txt"),
+    print_results("hardest.txt");
 run_solver(["solve", Filename]) ->
-    print_results(Filename, "\n").
+    print_results(Filename).
