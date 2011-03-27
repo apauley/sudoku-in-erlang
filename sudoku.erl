@@ -40,8 +40,8 @@ peers(Square) ->
     %% A unique list of squares (excluding this one)
     %% that are also part of the units for this square.
     NonUniquePeers = shallow_flatten([S || S <- units(Square)]),
-    PeerSet = sets:from_list(NonUniquePeers),
-    PeersWithSelf = sets:to_list(PeerSet),
+    PeerSet = gb_sets:from_list(NonUniquePeers),
+    PeersWithSelf = gb_sets:to_list(PeerSet),
     lists:delete(Square, PeersWithSelf).
 
 values(Puzzle, Square) ->
@@ -205,7 +205,8 @@ is_solved(Puzzle) ->
     all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
 is_unit_solved(Puzzle, Unit) ->
     UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
-    (length(UnitValues) == 9) and (sets:from_list(UnitValues) == sets:from_list(digits())).
+    (length(UnitValues) == 9)
+        and (gb_sets:from_list(UnitValues) == gb_sets:from_list(digits())).
 
 to_string(Puzzle) ->
     {ValuesDict, _} = Puzzle,
