@@ -2,16 +2,16 @@
 -import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2, sum/1]).
 -compile(export_all).
 
+-define(digits, "123456789").
+
 cross(SeqA, SeqB) ->
     %% Cross product of elements in SeqA and elements in SeqB.
     [[X,Y] || X <- SeqA, Y <- SeqB].
 
-digits() ->
-    "123456789".
 rows() ->
     "ABCDEFGHI".
 cols() ->
-    digits().
+    ?digits.
 
 squares() ->
     %% Returns a list of 81 square names, including "A1" etc.
@@ -54,14 +54,14 @@ parse_grid(GridString) ->
 
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
-    ValidChars = digits() ++ "0.",
+    ValidChars = ?digits ++ "0.",
     filter(fun(E) -> member(E, ValidChars) end, GridString).
 
 parse_puzzle(Puzzle, [], []) ->
     Puzzle;
 parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
     {_,_} = Puzzle,
-    IsDigit = member(Value, digits()),
+    IsDigit = member(Value, ?digits),
     NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
     {_,_} = NewPuzzle,
     parse_puzzle(NewPuzzle, Squares, GridString).
@@ -76,8 +76,7 @@ assign_if_digit(Puzzle, _, _, false) ->
 empty_puzzle() ->
     {empty_dict(), 0}.
 empty_dict() ->
-    Digits = digits(),
-    dict:from_list([{Square, Digits} || Square <- squares()]).
+    dict:from_list([{Square, ?digits} || Square <- squares()]).
 
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
@@ -204,7 +203,7 @@ is_solved(Puzzle) ->
 is_unit_solved(Puzzle, Unit) ->
     UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
     (length(UnitValues) == 9)
-        and (gb_sets:from_list(UnitValues) == gb_sets:from_list(digits())).
+        and (gb_sets:from_list(UnitValues) == gb_sets:from_list(?digits)).
 
 to_string(Puzzle) ->
     {ValuesDict, _} = Puzzle,

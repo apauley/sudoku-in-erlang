@@ -1,6 +1,6 @@
 -module(unittests).
 -import(lists, [all/2, member/2, sort/1]).
--import(sudoku, [cross/2, digits/0, values/2,
+-import(sudoku, [cross/2, values/2,
                  squares/0, col_squares/0, row_squares/0, box_squares/0,
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1, stats/1,
@@ -87,7 +87,7 @@ test_empty_puzzle() ->
 
     %% The values of all keys should start with all possible values.
     Squares = squares(),
-    Digits = digits(),
+    Digits = "123456789",
     true = all(fun(Values) -> Values == Digits end,
                [values(Puzzle, Square) || Square <- Squares]),
     ok.
@@ -132,7 +132,7 @@ test_eliminate() ->
     "2457" = values(NewPuzzle, "A2"),
 
     %% Eliminating the last value from a square should indicate an error
-    {false, _} = eliminate_digits(Puzzle, "A2", digits()),
+    {false, _} = eliminate_digits(Puzzle, "A2", "123456789"),
     ok.
 
 test_search_bails_out_early() ->
