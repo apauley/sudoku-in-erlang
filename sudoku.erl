@@ -3,26 +3,23 @@
 -compile(export_all).
 
 -define(digits, "123456789").
+-define(rows, "ABCDEFGHI").
+-define(cols, ?digits).
 
 cross(SeqA, SeqB) ->
     %% Cross product of elements in SeqA and elements in SeqB.
     [[X,Y] || X <- SeqA, Y <- SeqB].
 
-rows() ->
-    "ABCDEFGHI".
-cols() ->
-    ?digits.
-
 squares() ->
     %% Returns a list of 81 square names, including "A1" etc.
-    cross(rows(), cols()).
+    cross(?rows, ?cols).
 
 col_squares() ->
     %% All the square names for each column.
-    [cross(rows(), [C]) || C <- cols()].
+    [cross(?rows, [C]) || C <- ?cols].
 row_squares() ->
     %% All the square names for each row.
-    [cross([R], cols()) || R <- rows()].
+    [cross([R], ?cols) || R <- ?rows].
 box_squares() ->
     %% All the square names for each box.
     [cross(Rows, Cols) || Rows <- ["ABC", "DEF", "GHI"],
