@@ -40,9 +40,7 @@ peers(Square) ->
     %% A unique list of squares (excluding this one)
     %% that are also part of the units for this square.
     NonUniquePeers = shallow_flatten([S || S <- units(Square)]),
-    PeerSet = gb_sets:from_list(NonUniquePeers),
-    PeersWithSelf = gb_sets:to_list(PeerSet),
-    lists:delete(Square, PeersWithSelf).
+    lists:delete(Square, lists:usort(NonUniquePeers)).
 
 values(Puzzle, Square) ->
     %% Returns the digit values for a given square
