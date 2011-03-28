@@ -2,9 +2,10 @@
 -import(sudoku, [print_results/1]).
 
 main(Args) ->
-    {ok, sudoku} = compile:file(sudoku, [native]),
-    {ok, unittests} = compile:file(unittests, [native]),
-    {ok, ct_expand} = compile:file(ct_expand, [native]),
+    CompileOptions = [native],
+    {ok, sudoku} = compile:file(sudoku, CompileOptions),
+    {ok, unittests} = compile:file(unittests, CompileOptions),
+    {ok, ct_expand} = compile:file(ct_expand, CompileOptions),
     run_solver(Args).
 
 run_solver([]) ->
