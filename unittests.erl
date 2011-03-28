@@ -12,7 +12,6 @@
 %% Test the functionality using Joe Armstrong's Micro Lightweight Unit Testing:
 %% http://armstrongonsoftware.blogspot.com/2009/01/micro-lightweight-unit-testing.html
 test() ->
-    ok = test_cross(),
     ok = test_squares(),
     ok = test_unitlist(),
     ok = test_units(),
@@ -32,10 +31,6 @@ test() ->
     ok = test_is_solved(),
     ok = test_to_string(),
     ok = test_stats(),
-    ok.
-
-test_cross() ->
-    ["a1","a2","b1","b2"] = cross("ab", "12"),
     ok.
 
 test_squares() ->

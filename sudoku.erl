@@ -1,29 +1,26 @@
 -module(sudoku).
 -import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2, sum/1]).
 -compile(export_all).
+-compile({parse_transform, ct_expand}).
 
 -define(digits, "123456789").
 -define(rows, "abcdefghi").
 -define(cols, ?digits).
 
-cross(SeqA, SeqB) ->
-    %% Cross product of elements in SeqA and elements in SeqB.
-    [[X,Y] || X <- SeqA, Y <- SeqB].
-
 squares() ->
     %% Returns a list of 81 square names, including "a1" etc.
-    cross(?rows, ?cols).
-
+    ct_expand:term([[X,Y] || X <- ?rows, Y <- ?cols]).
 col_squares() ->
     %% All the square names for each column.
-    [cross(?rows, [C]) || C <- ?cols].
+    ct_expand:term([[[X,Y] || X <- ?rows, Y <- [C]] || C <- ?cols]).
 row_squares() ->
     %% All the square names for each row.
-    [cross([R], ?cols) || R <- ?rows].
+    ct_expand:term([[[X,Y] || X <- [R], Y <- ?cols] || R <- ?rows]).
 box_squares() ->
     %% All the square names for each box.
-    [cross(Rows, Cols) || Rows <- ["abc", "def", "ghi"],
-                          Cols <- ["123", "456", "789"]].
+    ct_expand:term([[[X,Y] || X <- R, Y <- C] ||
+                       R <- ["abc", "def", "ghi"],
+                       C <- ["123", "456", "789"]]).
 
 unitlist() ->
     %% A list of all units (columns, rows, boxes) in a grid.

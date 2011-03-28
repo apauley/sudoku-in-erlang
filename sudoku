@@ -4,6 +4,7 @@
 main(Args) ->
     {ok, sudoku} = compile:file(sudoku, [native]),
     {ok, unittests} = compile:file(unittests, [native]),
+    {ok, ct_expand} = compile:file(ct_expand, [native]),
     run_solver(Args).
 
 run_solver([]) ->
