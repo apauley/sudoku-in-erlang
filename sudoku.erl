@@ -3,7 +3,7 @@
 -compile(export_all).
 
 -define(digits, "123456789").
--define(rows, "ABCDEFGHI").
+-define(rows, "abcdefghi").
 -define(cols, ?digits).
 
 cross(SeqA, SeqB) ->
@@ -11,7 +11,7 @@ cross(SeqA, SeqB) ->
     [[X,Y] || X <- SeqA, Y <- SeqB].
 
 squares() ->
-    %% Returns a list of 81 square names, including "A1" etc.
+    %% Returns a list of 81 square names, including "a1" etc.
     cross(?rows, ?cols).
 
 col_squares() ->
@@ -22,7 +22,7 @@ row_squares() ->
     [cross([R], ?cols) || R <- ?rows].
 box_squares() ->
     %% All the square names for each box.
-    [cross(Rows, Cols) || Rows <- ["ABC", "DEF", "GHI"],
+    [cross(Rows, Cols) || Rows <- ["abc", "def", "ghi"],
                           Cols <- ["123", "456", "789"]].
 
 unitlist() ->

@@ -35,7 +35,7 @@ test() ->
     ok.
 
 test_cross() ->
-    ["A1","A2","B1","B2"] = cross("AB", "12"),
+    ["a1","a2","b1","b2"] = cross("ab", "12"),
     ok.
 
 test_squares() ->
@@ -43,14 +43,14 @@ test_squares() ->
     ok.
 
 test_unitlist() ->
-    [["A1","B1","C1","D1","E1","F1","G1","H1","I1"]|_] = col_squares(),
-    [["A1","A2","A3","A4","A5","A6","A7","A8","A9"]|_] = row_squares(),
-    [["A1","A2","A3","B1","B2","B3","C1","C2","C3"]|_] = box_squares(),
+    [["a1","b1","c1","d1","e1","f1","g1","h1","i1"]|_] = col_squares(),
+    [["a1","a2","a3","a4","a5","a6","a7","a8","a9"]|_] = row_squares(),
+    [["a1","a2","a3","b1","b2","b3","c1","c2","c3"]|_] = box_squares(),
     27 = length(unitlist()),
     ok.
 
 test_units() ->
-    [["A2","B2","C2","D2","E2","F2","G2","H2","I2"]|_] = units("C2"),
+    [["a2","b2","c2","d2","e2","f2","g2","h2","i2"]|_] = units("c2"),
 
     %% Each square should have exactly 3 units
     true = all(fun(Units) -> length(Units) == 3 end,
@@ -68,11 +68,11 @@ test_units() ->
     ok.
 
 test_peers() ->
-    Peers = sort(["C8", "F2", "G2", "H2", "C7",
-                       "I2", "A3", "A1", "C9", "A2",
-                       "B1", "B2", "B3", "C3", "C1",
-                       "C4", "D2", "C6", "C5", "E2"]),
-    Peers = sort(peers("C2")),
+    Peers = sort(["c8", "f2", "g2", "h2", "c7",
+                  "i2", "a3", "a1", "c9", "a2",
+                  "b1", "b2", "b3", "c3", "c1",
+                  "c4", "d2", "c6", "c5", "e2"]),
+    Peers = sort(peers("c2")),
 
     %% Each square should have exactly 20 squares as its peers
     true = all(fun(Units) -> length(Units) == 20 end,
@@ -111,28 +111,28 @@ test_parse_grid() ->
 
     %% A parsed grid will already have eliminated the values of some squares
     Puzzle = parse_grid(GridString),
-    "4" = values(Puzzle, "F2"),
+    "4" = values(Puzzle, "f2"),
     ok.
 
 test_least_valued_unassigned_square() ->
     %% Assign something to A1 and eliminate another from A2.
     %% A1 should not be considered, it's already assigned.
-    Puzzle = assign(eliminate_digits(empty_puzzle(), "A2", "234"), "A1", $1),
+    Puzzle = assign(eliminate_digits(empty_puzzle(), "a2", "234"), "a1", $1),
     false = is_solved(Puzzle),
-    {"A2", _} = least_valued_unassigned_square(Puzzle),
+    {"a2", _} = least_valued_unassigned_square(Puzzle),
 
     %% Any square can be returned when all values are equally unassigned
-    {"A1", _} = least_valued_unassigned_square(empty_puzzle()),
+    {"a1", _} = least_valued_unassigned_square(empty_puzzle()),
     ok.
 
 test_eliminate() ->
-    Puzzle = eliminate(empty_puzzle(), ["A2"], $3),
-    "12456789" = values(Puzzle, "A2"),
-    NewPuzzle = eliminate_digits(Puzzle, "A2", "13689"),
-    "2457" = values(NewPuzzle, "A2"),
+    Puzzle = eliminate(empty_puzzle(), ["a2"], $3),
+    "12456789" = values(Puzzle, "a2"),
+    NewPuzzle = eliminate_digits(Puzzle, "a2", "13689"),
+    "2457" = values(NewPuzzle, "a2"),
 
     %% Eliminating the last value from a square should indicate an error
-    {false, _} = eliminate_digits(Puzzle, "A2", "123456789"),
+    {false, _} = eliminate_digits(Puzzle, "a2", "123456789"),
     ok.
 
 test_search_bails_out_early() ->
@@ -152,37 +152,37 @@ test_search_solves_grid() ->
     ok.
 
 test_assign() ->
-    Puzzle = assign(empty_puzzle(), "A2", $1),
-    "1" = values(Puzzle, "A2"),
+    Puzzle = assign(empty_puzzle(), "a2", $1),
+    "1" = values(Puzzle, "a2"),
 
     %% Assigning a different value to an already assigned square should
     %% indicate an error.
-    {false, _} = assign(Puzzle, "A2", $3),
+    {false, _} = assign(Puzzle, "a2", $3),
     ok.
 
 test_assign_eliminates_from_peers() ->
-    NonPeerValues = values(empty_puzzle(), "D1"),
-    Puzzle = assign(empty_puzzle(), "A3", $7),
+    NonPeerValues = values(empty_puzzle(), "d1"),
+    Puzzle = assign(empty_puzzle(), "a3", $7),
 
-    %% Now 7 may not be a possible value in any of A3's peers
+    %% Now 7 may not be a possible value in any of a3's peers
     Fun = fun(Square) -> not (member($7, values(Puzzle, Square))) end,
-    true = all(Fun, peers("A3")),
+    true = all(Fun, peers("a3")),
 
     %% After assignment, the non-peers remain unchanged:
-    NonPeerValues = values(Puzzle, "D1"),
+    NonPeerValues = values(Puzzle, "d1"),
     ok.
 
 test_recursive_peer_elimination() ->
-    %% Eliminate all but two values from a peer of A3:
-    SetupPuzzle = eliminate_digits(empty_puzzle(), "A2", "2345689"),
-    "17" = values(SetupPuzzle, "A2"),
+    %% Eliminate all but two values from a peer of a3:
+    SetupPuzzle = eliminate_digits(empty_puzzle(), "a2", "2345689"),
+    "17" = values(SetupPuzzle, "a2"),
 
-    %% Assigning one of the above two values in A3 should trigger
-    %% peer elimination in A2 as well.
-    Puzzle = assign(SetupPuzzle, "A3", $7),
-    "1" = values(Puzzle, "A2"),
+    %% Assigning one of the above two values in a3 should trigger
+    %% peer elimination in a2 as well.
+    Puzzle = assign(SetupPuzzle, "a3", $7),
+    "1" = values(Puzzle, "a2"),
     Fun = fun(Square) -> not (member($1, values(Puzzle, Square))) end,
-    true = all(Fun, peers("A2")),
+    true = all(Fun, peers("a2")),
     ok.
 
 test_automatically_assign_unique_places() ->
@@ -190,18 +190,18 @@ test_automatically_assign_unique_places() ->
     GridString = ".....3.17.15..9..8.6.......1....
 7.....9...2.....5....4.......2.5..6..34.34.2.....",
     Puzzle = parse_grid(GridString),
-    "2" = values(Puzzle, "C9"),
+    "2" = values(Puzzle, "c9"),
     ok.
 
 test_places_for_value() ->
     GridString = ".45.81376.......................
 .................................................",
     Puzzle = parse_grid(GridString),
-    "29" = values(Puzzle, "A1"),
-    "29" = values(Puzzle, "A4"),
-    Unit = ["A1","A2","A3","A4","A5","A6","A7","A8","A9"],
-    ["A1","A4"] = places_for_value(Puzzle, Unit, $9),
-    ["A1","A4"] = places_for_value(Puzzle, Unit, $2),
+    "29" = values(Puzzle, "a1"),
+    "29" = values(Puzzle, "a4"),
+    Unit = ["a1","a2","a3","a4","a5","a6","a7","a8","a9"],
+    ["a1","a4"] = places_for_value(Puzzle, Unit, $9),
+    ["a1","a4"] = places_for_value(Puzzle, Unit, $2),
     ok.
 
 test_is_solved() ->
@@ -212,7 +212,7 @@ test_is_solved() ->
 test_to_string() ->
     GridString = ".1736982563215894795872431682543
 7169791586432346912758289643571573291684164875293",
-    Puzzle = eliminate_digits(parse_grid(GridString), "A1", "12356789"),
+    Puzzle = eliminate_digits(parse_grid(GridString), "a1", "12356789"),
     [$4|T] = to_string(Puzzle),
     [$.|T] = clean_grid(GridString),
     ok.
