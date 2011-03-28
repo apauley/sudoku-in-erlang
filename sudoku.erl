@@ -89,9 +89,8 @@ eliminate({false, Count}, _, _) ->
     {false, Count};
 eliminate(Puzzle, [], _) ->
     Puzzle;
-eliminate({Dict, Count}, [Square|T], Digit) ->
+eliminate(Puzzle, [Square|T], Digit) ->
     %% Eliminate the specified Digit from all specified Squares.
-    Puzzle = {Dict, Count+1},
     OldValues = values(Puzzle, Square),
     NewValues = exclude_from(OldValues, Digit),
     NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues, OldValues),
@@ -105,7 +104,7 @@ eliminate(Puzzle, _, _, Vs, Vs) ->
     Puzzle;
 eliminate({ValuesDict, Eliminations}, Square, Digit, NewValues, _) ->
     NewDict = dict:store(Square, NewValues, ValuesDict),
-    NewPuzzle = peer_eliminate({NewDict, Eliminations}, Square, NewValues),
+    NewPuzzle = peer_eliminate({NewDict, Eliminations+1}, Square, NewValues),
 
     %% Digit have been eliminated from this Square.
     %% Now see if the elimination has created a unique place for a digit
