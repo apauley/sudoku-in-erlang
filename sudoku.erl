@@ -196,7 +196,7 @@ is_solved(Puzzle) ->
 is_unit_solved(Puzzle, Unit) ->
     UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
     (length(UnitValues) == 9)
-        and (gb_sets:from_list(UnitValues) == gb_sets:from_list(?digits)).
+        and (lists:usort(UnitValues) == ?digits).
 
 to_string(Puzzle) ->
     {ValuesDict, _} = Puzzle,
