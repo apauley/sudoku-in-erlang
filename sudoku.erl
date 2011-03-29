@@ -9,22 +9,16 @@
 
 squares() ->
     %% Returns a list of 81 square names, including "a1" etc.
-    ct_expand:term([[X,Y] || X <- ?rows, Y <- ?cols]).
-col_squares() ->
-    %% All the square names for each column.
-    ct_expand:term([[[X,Y] || X <- ?rows, Y <- [C]] || C <- ?cols]).
-row_squares() ->
-    %% All the square names for each row.
-    ct_expand:term([[[X,Y] || X <- [R], Y <- ?cols] || R <- ?rows]).
-box_squares() ->
-    %% All the square names for each box.
-    ct_expand:term([[[X,Y] || X <- R, Y <- C] ||
-                       R <- ["abc", "def", "ghi"],
-                       C <- ["123", "456", "789"]]).
+    ct_expand:term([list_to_atom([X,Y]) || X <- ?rows, Y <- ?cols]).
 
 unitlist() ->
     %% A list of all units (columns, rows, boxes) in a grid.
-    col_squares() ++ row_squares() ++ box_squares().
+    ct_expand:term([[list_to_atom([X,Y]) || X <- ?rows, Y <- [C]] || C <- ?cols]
+                   ++ [[list_to_atom([X,Y])
+                        || X <- [R], Y <- ?cols] || R <- ?rows]
+                   ++ [[list_to_atom([X,Y]) || X <- R, Y <- C] ||
+                          R <- ["abc", "def", "ghi"],
+                          C <- ["123", "456", "789"]]).
 
 units(Square) ->
     %% A list of units for a specific square
