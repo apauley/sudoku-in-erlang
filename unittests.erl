@@ -45,11 +45,11 @@ test_units() ->
     [[a2,b2,c2,d2,e2,f2,g2,h2,i2]|_] = units(c2),
 
     %% Each square should have exactly 3 units
-    true = all(fun(Units) -> length(Units) == 3 end,
+    true = all(fun(Units) -> length(Units) =:= 3 end,
                [units(Square) || Square <- squares()]),
 
     %% Each unit should contain exactly nine squares
-    TruthValues = [all(fun(Unit) -> length(Unit) == 9 end,
+    TruthValues = [all(fun(Unit) -> length(Unit) =:= 9 end,
                        units(Square)) || Square <- squares()],
 
     %% Each square should be part of all its units
@@ -67,7 +67,7 @@ test_peers() ->
     Peers = sort(peers(c2)),
 
     %% Each square should have exactly 20 squares as its peers
-    true = all(fun(Units) -> length(Units) == 20 end,
+    true = all(fun(Units) -> length(Units) =:= 20 end,
                [peers(Square) || Square <- squares()]),
     ok.
 
@@ -80,7 +80,7 @@ test_empty_puzzle() ->
     %% The values of all keys should start with all possible values.
     Squares = squares(),
     Digits = "123456789",
-    true = all(fun(Values) -> Values == Digits end,
+    true = all(fun(Values) -> Values =:= Digits end,
                [values(Puzzle, Square) || Square <- Squares]),
     ok.
 
@@ -225,7 +225,7 @@ is_sudoku_puzzle(Puzzle) ->
     is_sudoku_dict(ValuesDict).
 
 is_sudoku_dict(ValuesDict) ->
-    lists:sort(dict:fetch_keys(ValuesDict)) == squares().
+    lists:sort(dict:fetch_keys(ValuesDict)) =:= squares().
 
 solved_puzzle() ->
     GridString = "41736982563215894795872431682543
