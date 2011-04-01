@@ -48,10 +48,8 @@ clean_grid(GridString) ->
 parse_puzzle(Puzzle, [], []) ->
     Puzzle;
 parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
-    {_,_} = Puzzle,
     IsDigit = member(Value, ?digits),
     NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
-    {_,_} = NewPuzzle,
     parse_puzzle(NewPuzzle, Squares, GridString).
 
 assign_if_digit(Puzzle, Square, Value, true) ->
