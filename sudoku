@@ -3,9 +3,9 @@
 
 main(Args) ->
     CompileOptions = [native],
+    {ok, ct_expand} = compile:file(ct_expand, CompileOptions),
     {ok, sudoku} = compile:file(sudoku, CompileOptions),
     {ok, unittests} = compile:file(unittests, CompileOptions),
-    {ok, ct_expand} = compile:file(ct_expand, CompileOptions),
     run_solver(Args).
 
 run_solver([]) ->
