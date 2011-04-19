@@ -4,7 +4,7 @@
 -import(sudoku, [print_results/1]).
 
 main(Args) ->
-    CompileOptions = [native],
+    CompileOptions = [native, debug_info],
     {ok, ct_expand} = compile:file(ct_expand, CompileOptions),
     {ok, sudoku} = compile:file(sudoku, CompileOptions),
     {ok, unittests} = compile:file(unittests, CompileOptions),
