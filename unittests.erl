@@ -1,6 +1,6 @@
 -module(unittests).
 -import(lists, [all/2, member/2, sort/1]).
--import(sudoku, [cross/2, values/2,
+-import(sudoku, [values/2,
                  squares/0,
                  unitlist/0, units/1, peers/1, search/1,
                  least_valued_unassigned_square/1, stats/1,
