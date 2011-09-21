@@ -175,17 +175,14 @@ first_valid_result({Dict, ValidCount}, Square, [_ | T],
 first_valid_result(_, _, _, Puzzle) -> Puzzle.
 
 least_valued_unassigned_square({ValuesDict, _}) ->
-    Lengths = [least_valued_unassigned_square_2(V)
-               || V <- dict:to_list(ValuesDict)],
-    Unassigned = [V1
-                  || V1 <- Lengths, least_valued_unassigned_square_1(V1)],
+    Lengths = [values_length(V) || V <- dict:to_list(ValuesDict)],
+    Unassigned = [L || L <- Lengths, unassigned(L)],
     {_, Square, Values} = lists:min(Unassigned),
     {Square, Values}.
 
-least_valued_unassigned_square_1({Length, _, _}) ->
-    Length > 1.
+unassigned({Length, _, _}) -> Length > 1.
 
-least_valued_unassigned_square_2({S, Values}) ->
+values_length({S, Values}) ->
     {length(Values), S, Values}.
 
 solve_all(GridList) ->
