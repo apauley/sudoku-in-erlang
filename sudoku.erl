@@ -1,17 +1,10 @@
 -module(sudoku).
 
--import(lists,
-        [member/2, filter/2, map/2, flatmap/2, sort/1, all/2,
-         sum/1]).
-
 -compile(export_all).
-
 -compile({parse_transform, ct_expand}).
 
 -define(digits, "123456789").
-
 -define(rows, "abcdefghi").
-
 -define(cols, ?digits).
 
 squares() ->
