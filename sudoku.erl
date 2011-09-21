@@ -8,7 +8,7 @@
 -define(cols, ?digits).
 
 squares() ->
-    %% Returns a list of 81 square names, including "a1" etc.
+    %% Returns a list of 81 square names, including 'a1' etc.
     ct_expand:term([list_to_atom([X, Y])
                     || X <- ?rows, Y <- ?cols]).
 
@@ -32,8 +32,7 @@ units(Square) ->
 peers(Square) ->
     %% A unique list of squares (excluding this one)
     %% that are also part of the units for this square.
-    NonUniquePeers = shallow_flatten([S
-                                      || S <- units(Square)]),
+    NonUniquePeers = lists:flatten([S || S <- units(Square)]),
     lists:delete(Square, lists:usort(NonUniquePeers)).
 
 values(Puzzle, Square) ->
@@ -265,9 +264,6 @@ stats(List) ->
     Max = lists:max(List),
     Min = lists:min(List),
     {Total, Avg, Med, Max, Min, Length}.
-
-shallow_flatten([]) -> [];
-shallow_flatten([H | T]) -> H ++ shallow_flatten(T).
 
 exclude_from(Values, Digit) ->
     lists:delete(Digit, Values).
