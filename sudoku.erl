@@ -188,7 +188,7 @@ values_length({S, Values}) ->
 solve_all(GridList) ->
     PidGrids = [{spawn(fun server/0), Grid}
                 || Grid <- GridList],
-    [send_puzzle(PG) || PG <- PidGrids],
+    lists:foreach(fun send_puzzle/1, PidGrids),
     [receive_solution(V) || V <- PidGrids].
 
 send_puzzle({Pid, Grid}) -> Pid ! {self(), solve, Grid}.
