@@ -85,14 +85,14 @@ assign(Puzzle, Square, Digit) ->
 			       Digit),
     eliminate_digits(Puzzle, Square, OtherValues).
 
-eliminate_digits({false, Count}, _, _) ->
-    {false, Count};
+eliminate_digits({false, _Count} = False, _, _) ->
+    False;
 eliminate_digits(Puzzle, _, []) -> Puzzle;
 eliminate_digits(Puzzle, Square, [Digit | T]) ->
     PuzzleOrFalse = eliminate(Puzzle, [Square], Digit),
     eliminate_digits(PuzzleOrFalse, Square, T).
 
-eliminate({false, Count}, _, _) -> {false, Count};
+eliminate({false, _Count} = False, _, _) -> False;
 eliminate(Puzzle, [], _) -> Puzzle;
 eliminate(Puzzle, [Square | T], Digit) ->
     %% Eliminate the specified Digit from all specified Squares.
@@ -126,8 +126,8 @@ peer_eliminate(Puzzle, _, _) ->
     %% Multiple values, cannot eliminate from peers.
     Puzzle.
 
-assign_unique_place({false, Count}, _, _) ->
-    {false, Count};
+assign_unique_place({false, _Count} = False, _, _) ->
+    False;
 assign_unique_place(Puzzle, [], _) -> Puzzle;
 assign_unique_place(Puzzle, [Unit | T], Digit) ->
     %% If a certain digit can only be in one place in a unit,
@@ -155,7 +155,7 @@ places_for_value(Puzzle, Unit, Digit) ->
 
 solve(GridString) -> search(parse_grid(GridString)).
 
-search({false, Count}) -> {false, Count};
+search({false, _Count} = False) -> False;
 search(Puzzle) -> search(Puzzle, is_solved(Puzzle)).
 
 search(Puzzle, true) ->
@@ -168,10 +168,9 @@ search(Puzzle, false) ->
 
 %% Returns the first valid puzzle, otherwise the last puzzle
 first_valid_result({_, Count}, _, []) -> {false, Count};
-first_valid_result(Puzzle, Square, [Digit | T]) ->
+first_valid_result(Puzzle, Square, [Digit | _T] = Digits) ->
     PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
-    first_valid_result(Puzzle, Square, [Digit | T],
-		       PuzzleOrFalse).
+    first_valid_result(Puzzle, Square, Digits, PuzzleOrFalse).
 
 first_valid_result({Dict, ValidCount}, Square, [_ | T],
 		   {false, InvalidCount}) ->
