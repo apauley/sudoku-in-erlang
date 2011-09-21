@@ -168,9 +168,11 @@ search(Puzzle, false) ->
 
 %% Returns the first valid puzzle, otherwise the last puzzle
 first_valid_result({_, Count}, _, []) -> {false, Count};
-first_valid_result(Puzzle, Square, [Digit | _T] = Digits) ->
+first_valid_result(Puzzle, Square,
+		   [Digit | _T] = Digits) ->
     PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
-    first_valid_result(Puzzle, Square, Digits, PuzzleOrFalse).
+    first_valid_result(Puzzle, Square, Digits,
+		       PuzzleOrFalse).
 
 first_valid_result({Dict, ValidCount}, Square, [_ | T],
 		   {false, InvalidCount}) ->
