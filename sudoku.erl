@@ -56,8 +56,7 @@ parse_grid(GridString) ->
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
     ValidChars = (?digits) ++ "0.",
-    lists:filter(fun (E) -> lists:member(E, ValidChars) end,
-		 GridString).
+    [E || E <- GridString, lists:member(E, ValidChars)].
 
 parse_puzzle(Puzzle, [], []) -> Puzzle;
 parse_puzzle(Puzzle, [Square | Squares],
@@ -182,25 +181,26 @@ first_valid_result({Dict, ValidCount}, Square, [_ | T],
 first_valid_result(_, _, _, Puzzle) -> Puzzle.
 
 least_valued_unassigned_square({ValuesDict, _}) ->
-    Lengths = lists:map(fun ({S, Values}) ->
-				{length(Values), S, Values}
-			end,
-			dict:to_list(ValuesDict)),
-    Unassigned = lists:filter(fun ({Length, _, _}) ->
-				      Length > 1
-			      end,
-			      Lengths),
+    Lengths = [least_valued_unassigned_square_2(V)
+	       || V <- dict:to_list(ValuesDict)],
+    Unassigned = [V1
+		  || V1 <- Lengths, least_valued_unassigned_square_1(V1)],
     {_, Square, Values} = lists:min(Unassigned),
     {Square, Values}.
+
+least_valued_unassigned_square_1({Length, _, _}) ->
+    Length > 1.
+
+least_valued_unassigned_square_2({S, Values}) ->
+    {length(Values), S, Values}.
 
 solve_all(GridList) ->
     PidGrids = [{spawn(fun server/0), Grid}
 		|| Grid <- GridList],
-    lists:map(fun ({Pid, Grid}) ->
-		      Pid ! {self(), solve, Grid}
-	      end,
-	      PidGrids),
-    lists:map(fun receiveSolution/1, PidGrids).
+    [solve_all_1(V) || V <- PidGrids],
+    [receiveSolution(V1) || V1 <- PidGrids].
+
+solve_all_1({Pid, Grid}) -> Pid ! {self(), solve, Grid}.
 
 receiveSolution({Pid, Grid}) ->
     receive {Pid, Grid, Solution} -> Solution end.
@@ -235,9 +235,7 @@ from_file(Filename, Seperator) ->
     string:tokens(binary_to_list(BinData), Seperator).
 
 to_file(Filename, Solutions) ->
-    GridStrings = lists:map(fun (S) -> [to_string(S) | "\n"]
-			    end,
-			    Solutions),
+    GridStrings = [[to_string(S) | "\n"] || S <- Solutions],
     ok = file:write_file(Filename,
 			 list_to_binary(GridStrings)).
 
@@ -254,9 +252,8 @@ print_results(Filename) ->
 print_results(Filename, Seperator) ->
     {Time, Solutions} = timer:tc(sudoku, solve_file,
 				 [Filename, Seperator]),
-    Solved = lists:filter(fun (Puzzle) -> is_solved(Puzzle)
-			  end,
-			  Solutions),
+    Solved = [Puzzle
+	      || Puzzle <- Solutions, is_solved(Puzzle)],
     TimeInSeconds = Time / 1000000,
     Eliminations = [Count || {_, Count} <- Solutions],
     {Total, Avg, Med, Max, Min, NumberPuzzles} =
