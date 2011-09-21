@@ -1,33 +1,46 @@
 -module(sudoku).
--import(lists, [member/2, filter/2, map/2, flatmap/2, sort/1, all/2, sum/1]).
+
+-import(lists,
+	[member/2, filter/2, map/2, flatmap/2, sort/1, all/2,
+	 sum/1]).
+
 -compile(export_all).
+
 -compile({parse_transform, ct_expand}).
 
 -define(digits, "123456789").
+
 -define(rows, "abcdefghi").
+
 -define(cols, ?digits).
 
 squares() ->
     %% Returns a list of 81 square names, including "a1" etc.
-    ct_expand:term([list_to_atom([X,Y]) || X <- ?rows, Y <- ?cols]).
+    ct_expand:term([list_to_atom([X, Y])
+		    || X <- ?rows, Y <- ?cols]).
 
 unitlist() ->
     %% A list of all units (columns, rows, boxes) in a grid.
-    ct_expand:term([[list_to_atom([X,Y]) || X <- ?rows, Y <- [C]] || C <- ?cols]
-                   ++ [[list_to_atom([X,Y])
-                        || X <- [R], Y <- ?cols] || R <- ?rows]
-                   ++ [[list_to_atom([X,Y]) || X <- R, Y <- C] ||
-                          R <- ["abc", "def", "ghi"],
-                          C <- ["123", "456", "789"]]).
+    ct_expand:term([[list_to_atom([X, Y])
+		     || X <- ?rows, Y <- [C]]
+		    || C <- ?cols]
+		     ++
+		     [[list_to_atom([X, Y]) || X <- [R], Y <- ?cols]
+		      || R <- ?rows]
+		       ++
+		       [[list_to_atom([X, Y]) || X <- R, Y <- C]
+			|| R <- ["abc", "def", "ghi"],
+			   C <- ["123", "456", "789"]]).
 
 units(Square) ->
     %% A list of units for a specific square
-    [S || S <- unitlist(), member(Square, S)].
+    [S || S <- unitlist(), lists:member(Square, S)].
 
 peers(Square) ->
     %% A unique list of squares (excluding this one)
     %% that are also part of the units for this square.
-    NonUniquePeers = shallow_flatten([S || S <- units(Square)]),
+    NonUniquePeers = shallow_flatten([S
+				      || S <- units(Square)]),
     lists:delete(Square, lists:usort(NonUniquePeers)).
 
 values(Puzzle, Square) ->
@@ -42,14 +55,16 @@ parse_grid(GridString) ->
 
 clean_grid(GridString) ->
     %% Return a string with only digits, 0 and .
-    ValidChars = ?digits ++ "0.",
-    filter(fun(E) -> member(E, ValidChars) end, GridString).
+    ValidChars = (?digits) ++ "0.",
+    lists:filter(fun (E) -> lists:member(E, ValidChars) end,
+		 GridString).
 
-parse_puzzle(Puzzle, [], []) ->
-    Puzzle;
-parse_puzzle(Puzzle, [Square|Squares], [Value|GridString]) ->
-    IsDigit = member(Value, ?digits),
-    NewPuzzle = assign_if_digit(Puzzle, Square, Value, IsDigit),
+parse_puzzle(Puzzle, [], []) -> Puzzle;
+parse_puzzle(Puzzle, [Square | Squares],
+	     [Value | GridString]) ->
+    IsDigit = lists:member(Value, ?digits),
+    NewPuzzle = assign_if_digit(Puzzle, Square, Value,
+				IsDigit),
     parse_puzzle(NewPuzzle, Squares, GridString).
 
 assign_if_digit(Puzzle, Square, Value, true) ->
@@ -59,33 +74,33 @@ assign_if_digit(Puzzle, _, _, false) ->
     %% Not possible to assign
     Puzzle.
 
-empty_puzzle() ->
-    {empty_dict(), 0}.
+empty_puzzle() -> {empty_dict(), 0}.
+
 empty_dict() ->
-    dict:from_list([{Square, ?digits} || Square <- squares()]).
+    dict:from_list([{Square, ?digits}
+		    || Square <- squares()]).
 
 assign(Puzzle, Square, Digit) ->
     %% Assign by eliminating all values except the assigned value.
-    OtherValues = exclude_from(values(Puzzle, Square), Digit),
+    OtherValues = exclude_from(values(Puzzle, Square),
+			       Digit),
     eliminate_digits(Puzzle, Square, OtherValues).
 
 eliminate_digits({false, Count}, _, _) ->
     {false, Count};
-eliminate_digits(Puzzle, _, []) ->
-    Puzzle;
-eliminate_digits(Puzzle, Square, [Digit|T]) ->
+eliminate_digits(Puzzle, _, []) -> Puzzle;
+eliminate_digits(Puzzle, Square, [Digit | T]) ->
     PuzzleOrFalse = eliminate(Puzzle, [Square], Digit),
     eliminate_digits(PuzzleOrFalse, Square, T).
 
-eliminate({false, Count}, _, _) ->
-    {false, Count};
-eliminate(Puzzle, [], _) ->
-    Puzzle;
-eliminate(Puzzle, [Square|T], Digit) ->
+eliminate({false, Count}, _, _) -> {false, Count};
+eliminate(Puzzle, [], _) -> Puzzle;
+eliminate(Puzzle, [Square | T], Digit) ->
     %% Eliminate the specified Digit from all specified Squares.
     OldValues = values(Puzzle, Square),
     NewValues = exclude_from(OldValues, Digit),
-    NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues, OldValues),
+    NewPuzzle = eliminate(Puzzle, Square, Digit, NewValues,
+			  OldValues),
     eliminate(NewPuzzle, T, Digit).
 
 eliminate({_, Count}, _, _, [], _) ->
@@ -94,10 +109,11 @@ eliminate({_, Count}, _, _, [], _) ->
 eliminate(Puzzle, _, _, Vs, Vs) ->
     %% NewValues and OldValues are the same, already eliminated.
     Puzzle;
-eliminate({ValuesDict, Eliminations}, Square, Digit, NewValues, _) ->
+eliminate({ValuesDict, Eliminations}, Square, Digit,
+	  NewValues, _) ->
     NewDict = dict:store(Square, NewValues, ValuesDict),
-    NewPuzzle = peer_eliminate({NewDict, Eliminations+1}, Square, NewValues),
-
+    NewPuzzle = peer_eliminate({NewDict, Eliminations + 1},
+			       Square, NewValues),
     %% Digit have been eliminated from this Square.
     %% Now see if the elimination has created a unique place for a digit
     %% to live in the surrounding units of this Square.
@@ -113,19 +129,20 @@ peer_eliminate(Puzzle, _, _) ->
 
 assign_unique_place({false, Count}, _, _) ->
     {false, Count};
-assign_unique_place(Puzzle, [], _) ->
-    Puzzle;
-assign_unique_place(Puzzle, [Unit|T], Digit) ->
+assign_unique_place(Puzzle, [], _) -> Puzzle;
+assign_unique_place(Puzzle, [Unit | T], Digit) ->
     %% If a certain digit can only be in one place in a unit,
     %% assign it.
     Places = places_for_value(Puzzle, Unit, Digit),
-    NewPuzzle = assign_unique_place_for_digit(Puzzle, Places, Digit),
+    NewPuzzle = assign_unique_place_for_digit(Puzzle,
+					      Places, Digit),
     assign_unique_place(NewPuzzle, T, Digit).
 
 assign_unique_place_for_digit({_, Count}, [], _) ->
     %% Contradiction: no place for Digit found
     {false, Count};
-assign_unique_place_for_digit(Puzzle, [Square], Digit) ->
+assign_unique_place_for_digit(Puzzle, [Square],
+			      Digit) ->
     %% Unique place for Digit found, assign
     assign(Puzzle, Square, Digit);
 assign_unique_place_for_digit(Puzzle, _, _) ->
@@ -133,110 +150,136 @@ assign_unique_place_for_digit(Puzzle, _, _) ->
     Puzzle.
 
 places_for_value(Puzzle, Unit, Digit) ->
-    [Square||Square <- Unit, member(Digit, values(Puzzle, Square))].
+    [Square
+     || Square <- Unit,
+	lists:member(Digit, values(Puzzle, Square))].
 
-solve(GridString) ->
-    search(parse_grid(GridString)).
+solve(GridString) -> search(parse_grid(GridString)).
 
-search({false, Count}) ->
-    {false, Count};
-search(Puzzle) ->
-    search(Puzzle, is_solved(Puzzle)).
+search({false, Count}) -> {false, Count};
+search(Puzzle) -> search(Puzzle, is_solved(Puzzle)).
+
 search(Puzzle, true) ->
     %% Searching an already solved puzzle should just return it unharmed.
     Puzzle;
 search(Puzzle, false) ->
-    {Square, Values} = least_valued_unassigned_square(Puzzle),
+    {Square, Values} =
+	least_valued_unassigned_square(Puzzle),
     first_valid_result(Puzzle, Square, Values).
 
 %% Returns the first valid puzzle, otherwise the last puzzle
-first_valid_result({_, Count}, _, []) ->
-    {false, Count};
-first_valid_result(Puzzle, Square, [Digit|T]) ->
+first_valid_result({_, Count}, _, []) -> {false, Count};
+first_valid_result(Puzzle, Square, [Digit | T]) ->
     PuzzleOrFalse = search(assign(Puzzle, Square, Digit)),
-    first_valid_result(Puzzle, Square, [Digit|T], PuzzleOrFalse).
-first_valid_result({Dict, ValidCount}, Square, [_|T], {false, InvalidCount}) ->
-    first_valid_result({Dict, ValidCount+(InvalidCount-ValidCount)}, Square, T);
-first_valid_result(_, _, _, Puzzle) ->
-    Puzzle.
+    first_valid_result(Puzzle, Square, [Digit | T],
+		       PuzzleOrFalse).
+
+first_valid_result({Dict, ValidCount}, Square, [_ | T],
+		   {false, InvalidCount}) ->
+    first_valid_result({Dict,
+			ValidCount + (InvalidCount - ValidCount)},
+		       Square, T);
+first_valid_result(_, _, _, Puzzle) -> Puzzle.
 
 least_valued_unassigned_square({ValuesDict, _}) ->
-    Lengths = map(fun({S, Values}) -> {length(Values), S, Values} end,
-                  dict:to_list(ValuesDict)),
-    Unassigned = filter(fun({Length, _, _}) -> Length > 1 end, Lengths),
+    Lengths = lists:map(fun ({S, Values}) ->
+				{length(Values), S, Values}
+			end,
+			dict:to_list(ValuesDict)),
+    Unassigned = lists:filter(fun ({Length, _, _}) ->
+				      Length > 1
+			      end,
+			      Lengths),
     {_, Square, Values} = lists:min(Unassigned),
     {Square, Values}.
 
 solve_all(GridList) ->
-    PidGrids = [{spawn(fun server/0), Grid}|| Grid <- GridList],
-    map(fun({Pid, Grid}) -> Pid ! {self(), solve, Grid} end, PidGrids),
-    map(fun receiveSolution/1, PidGrids).
+    PidGrids = [{spawn(fun server/0), Grid}
+		|| Grid <- GridList],
+    lists:map(fun ({Pid, Grid}) ->
+		      Pid ! {self(), solve, Grid}
+	      end,
+	      PidGrids),
+    lists:map(fun receiveSolution/1, PidGrids).
 
 receiveSolution({Pid, Grid}) ->
-    receive
-        {Pid, Grid, Solution} -> Solution
-    end.
+    receive {Pid, Grid, Solution} -> Solution end.
 
 server() ->
     receive
-        {From, solve, GridString} ->
-            From ! {self(), GridString, solve(GridString)}
+      {From, solve, GridString} ->
+	  From ! {self(), GridString, solve(GridString)}
     end.
 
 is_solved(Puzzle) ->
-    all(fun(Unit) -> is_unit_solved(Puzzle, Unit) end, unitlist()).
+    lists:all(fun (Unit) -> is_unit_solved(Puzzle, Unit)
+	      end,
+	      unitlist()).
+
 is_unit_solved(Puzzle, Unit) ->
-    UnitValues = flatmap(fun(S) -> values(Puzzle, S) end, Unit),
-    sort(UnitValues) =:= ?digits.
+    UnitValues = lists:flatmap(fun (S) -> values(Puzzle, S)
+			       end,
+			       Unit),
+    lists:sort(UnitValues) =:= (?digits).
 
 to_string(Puzzle) ->
     {ValuesDict, _} = Puzzle,
-    Fun = fun({_, [V]}) -> [V];
-             ({_, _}) -> "."
-          end,
-    flatmap(Fun, sort(dict:to_list(ValuesDict))).
+    Fun = fun ({_, [V]}) -> [V];
+	      ({_, _}) -> "."
+	  end,
+    lists:flatmap(Fun,
+		  lists:sort(dict:to_list(ValuesDict))).
 
 from_file(Filename, Seperator) ->
     {ok, BinData} = file:read_file(Filename),
     string:tokens(binary_to_list(BinData), Seperator).
 
 to_file(Filename, Solutions) ->
-    GridStrings = map(fun(S) -> [to_string(S)|"\n"] end, Solutions),
-    ok = file:write_file(Filename, list_to_binary(GridStrings)).
+    GridStrings = lists:map(fun (S) -> [to_string(S) | "\n"]
+			    end,
+			    Solutions),
+    ok = file:write_file(Filename,
+			 list_to_binary(GridStrings)).
 
 solve_file(Filename, Seperator) ->
     Solutions = solve_all(from_file(Filename, Seperator)),
-    OutFilename = [filename:basename(Filename, ".txt")|".out"],
+    OutFilename = [filename:basename(Filename, ".txt")
+		   | ".out"],
     ok = to_file(OutFilename, Solutions),
     Solutions.
 
 print_results(Filename) ->
     print_results(Filename, "\n").
+
 print_results(Filename, Seperator) ->
-    {Time, Solutions} = timer:tc(sudoku, solve_file, [Filename, Seperator]),
-    Solved = filter(fun(Puzzle) -> is_solved(Puzzle) end, Solutions),
-    TimeInSeconds = Time/1000000,
-    Eliminations = [Count|| {_, Count} <- Solutions],
-    {Total, Avg, Med, Max, Min, NumberPuzzles} = stats(Eliminations),
-    Hz = NumberPuzzles/TimeInSeconds,
-    Msg = "Solved ~p of ~p puzzles from ~s in ~f secs (~.2f Hz)
-  (~p total eliminations, avg ~.2f, median ~p, max ~p, min ~p).~n",
+    {Time, Solutions} = timer:tc(sudoku, solve_file,
+				 [Filename, Seperator]),
+    Solved = lists:filter(fun (Puzzle) -> is_solved(Puzzle)
+			  end,
+			  Solutions),
+    TimeInSeconds = Time / 1000000,
+    Eliminations = [Count || {_, Count} <- Solutions],
+    {Total, Avg, Med, Max, Min, NumberPuzzles} =
+	stats(Eliminations),
+    Hz = NumberPuzzles / TimeInSeconds,
+    Msg = "Solved ~p of ~p puzzles from ~s in ~f "
+	  "secs (~.2f Hz)\n  (~p total eliminations, "
+	  "avg ~.2f, median ~p, max ~p, min ~p).~n",
     io:format(Msg,
-              [length(Solved), NumberPuzzles, Filename, TimeInSeconds, Hz,
-               Total, Avg, Med, Max, Min]).
+	      [length(Solved), NumberPuzzles, Filename, TimeInSeconds,
+	       Hz, Total, Avg, Med, Max, Min]).
 
 stats(List) ->
-    Total = sum(List),
+    Total = lists:sum(List),
     Length = length(List),
-    Avg = Total/Length,
-    Med = lists:nth(round((Length/2)), sort(List)),
+    Avg = Total / Length,
+    Med = lists:nth(round(Length / 2), lists:sort(List)),
     Max = lists:max(List),
     Min = lists:min(List),
     {Total, Avg, Med, Max, Min, Length}.
 
 shallow_flatten([]) -> [];
-shallow_flatten([H|T]) ->
-    H ++ shallow_flatten(T).
+shallow_flatten([H | T]) -> H ++ shallow_flatten(T).
 
 exclude_from(Values, Digit) ->
     lists:delete(Digit, Values).
