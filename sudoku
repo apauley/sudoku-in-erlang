@@ -4,21 +4,18 @@
 -import(sudoku, [print_results/1]).
 
 main(Args) ->
-    CompileOptions = [native, debug_info],
-    {ok, ct_expand} = compile:file(ct_expand, CompileOptions),
-    {ok, sudoku} = compile:file(sudoku, CompileOptions),
-    {ok, unittests} = compile:file(unittests, CompileOptions),
-    run_solver(Args).
+  true = code:add_pathz("./ebin"),
+  run_solver(Args).
 
 run_solver([]) ->
-    run_solver(["runtests"]),
-    run_solver(["solve"]);
+  run_solver(["runtests"]),
+  run_solver(["solve"]);
 run_solver(["runtests"]) ->
-    ok = unittests:test(),
-    io:format("All tests passed :-)~n");
+  ok = unittests:test(),
+  io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-    print_results("easy50.txt"),
-    print_results("top95.txt"),
-    print_results("hardest.txt");
+  print_results("easy50.txt"),
+  print_results("top95.txt"),
+  print_results("hardest.txt");
 run_solver(["solve", Filename]) ->
-    print_results(Filename).
+  print_results(Filename).
