@@ -14,8 +14,8 @@ run_solver(["runtests"]) ->
   ok = unittests:test(),
   io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-  print_results("easy50.txt"),
-  print_results("top95.txt"),
-  print_results("hardest.txt");
+  print_results("./priv/easy50.txt"),
+  print_results("./priv/top95.txt"),
+  print_results("./priv/hardest.txt");
 run_solver(["solve", Filename]) ->
   print_results(Filename).
