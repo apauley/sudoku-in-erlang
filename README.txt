@@ -3,7 +3,8 @@ solution by Peter Norvig.
 For comparison, see my slightly modified version of Norvig's Python code:
 https://github.com/apauley/sudoku-by-norvig
 
-To try it out, simply run the sudoku script:
+To try it out, simply compile and run the sudoku script:
+$ ./rebar compile
 $ ./sudoku
 
 The solution for file.txt will be saved as file.out in your current directory.
