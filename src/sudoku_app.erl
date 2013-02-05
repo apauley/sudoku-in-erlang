@@ -10,7 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    sudoku_sup:start_link().
+  sudoku_sup:start_link().
 
 stop(_State) ->
-    ok.
+  ok.
