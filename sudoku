@@ -1,8 +1,6 @@
 #!/usr/bin/env escript
 %%% -*- mode:erlang -*-
 
--import(sudoku, [print_results/1]).
-
 main(Args) ->
   true = code:add_pathz("./ebin"),
   run_solver(Args).
@@ -11,11 +9,11 @@ run_solver([]) ->
   run_solver(["runtests"]),
   run_solver(["solve"]);
 run_solver(["runtests"]) ->
-  ok = unittests:test(),
+  ok = sudoku:test(),
   io:format("All tests passed :-)~n");
 run_solver(["solve"]) ->
-  print_results("./priv/easy50.txt"),
-  print_results("./priv/top95.txt"),
-  print_results("./priv/hardest.txt");
+  sudoku:print_results("./priv/easy50.txt"),
+  sudoku:print_results("./priv/top95.txt"),
+  sudoku:print_results("./priv/hardest.txt");
 run_solver(["solve", Filename]) ->
-  print_results(Filename).
+  sudoku:print_results(Filename).
