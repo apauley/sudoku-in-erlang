@@ -1,5 +1,8 @@
 -module(sudoku).
 
+-export([solve_all/1,
+         print_results/1]).
+
 -compile(export_all).
 -compile({parse_transform, ct_expand}).
 
@@ -7,10 +10,38 @@
 -define(rows, "abcdefghi").
 -define(cols, ?digits).
 
-
 solve_all(GridList) ->
   SolutionDicts = solve_all_return_dicts(GridList),
   [to_string(S) || S <- SolutionDicts].
+
+print_results(Filename) ->
+  print_results(Filename, "\n").
+
+print_results(Filename, Seperator) ->
+  {Time, Solutions} = timer:tc(sudoku, solve_file,
+                               [Filename, Seperator]),
+  Solved = [Puzzle
+            || Puzzle <- Solutions, is_solved(Puzzle)],
+  TimeInSeconds = Time / 1000000,
+  Eliminations = [Count || {_, Count} <- Solutions],
+  {Total, Avg, Med, Max, Min, NumberPuzzles} =
+    stats(Eliminations),
+  Hz = NumberPuzzles / TimeInSeconds,
+  Msg = "Solved ~p of ~p puzzles from ~s in ~f "
+    "secs (~.2f Hz)\n  (~p total eliminations, "
+    "avg ~.2f, median ~p, max ~p, min ~p).~n",
+  io:format(Msg,
+            [length(Solved), NumberPuzzles, Filename, TimeInSeconds,
+             Hz, Total, Avg, Med, Max, Min]).
+
+stats(List) ->
+  Total = lists:sum(List),
+  Length = length(List),
+  Avg = Total / Length,
+  Med = lists:nth(round(Length / 2), lists:sort(List)),
+  Max = lists:max(List),
+  Min = lists:min(List),
+  {Total, Avg, Med, Max, Min, Length}.
 
 squares() ->
   %% Returns a list of 81 square names, including 'a1' etc.
@@ -241,35 +272,6 @@ solve_file(Filename, Seperator) ->
                  | ".out"],
   ok = to_file(OutFilename, Solutions),
   Solutions.
-
-print_results(Filename) ->
-  print_results(Filename, "\n").
-
-print_results(Filename, Seperator) ->
-  {Time, Solutions} = timer:tc(sudoku, solve_file,
-                               [Filename, Seperator]),
-  Solved = [Puzzle
-            || Puzzle <- Solutions, is_solved(Puzzle)],
-  TimeInSeconds = Time / 1000000,
-  Eliminations = [Count || {_, Count} <- Solutions],
-  {Total, Avg, Med, Max, Min, NumberPuzzles} =
-    stats(Eliminations),
-  Hz = NumberPuzzles / TimeInSeconds,
-  Msg = "Solved ~p of ~p puzzles from ~s in ~f "
-    "secs (~.2f Hz)\n  (~p total eliminations, "
-    "avg ~.2f, median ~p, max ~p, min ~p).~n",
-  io:format(Msg,
-            [length(Solved), NumberPuzzles, Filename, TimeInSeconds,
-             Hz, Total, Avg, Med, Max, Min]).
-
-stats(List) ->
-  Total = lists:sum(List),
-  Length = length(List),
-  Avg = Total / Length,
-  Med = lists:nth(round(Length / 2), lists:sort(List)),
-  Max = lists:max(List),
-  Min = lists:min(List),
-  {Total, Avg, Med, Max, Min, Length}.
 
 exclude_from(Values, Digit) ->
   lists:delete(Digit, Values).
