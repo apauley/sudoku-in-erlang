@@ -7,6 +7,11 @@
 -define(rows, "abcdefghi").
 -define(cols, ?digits).
 
+
+solve_all(GridList) ->
+  SolutionDicts = solve_all_return_dicts(GridList),
+  [to_string(S) || S <- SolutionDicts].
+
 squares() ->
   %% Returns a list of 81 square names, including 'a1' etc.
   ct_expand:term([list_to_atom([X, Y])
@@ -184,7 +189,7 @@ unassigned({Length, _, _}) -> Length > 1.
 values_length({S, Values}) ->
   {length(Values), S, Values}.
 
-solve_all(GridList) ->
+solve_all_return_dicts(GridList) ->
   PidGrids = [{spawn(fun server/0), Grid}
               || Grid <- GridList],
   lists:foreach(fun send_puzzle/1, PidGrids),
@@ -202,7 +207,8 @@ server() ->
   end.
 
 is_solved(Puzzle) ->
-  lists:all(fun (Unit) -> is_unit_solved(Puzzle, Unit)
+  lists:all(fun (Unit) ->
+                is_unit_solved(Puzzle, Unit)
             end,
             unitlist()).
 
@@ -225,12 +231,12 @@ from_file(Filename, Seperator) ->
   string:tokens(binary_to_list(BinData), Seperator).
 
 to_file(Filename, Solutions) ->
-  GridStrings = [[to_string(S) | "\n"] || S <- Solutions],
+  GridStrings = [to_string(S) ++ "\n" || S <- Solutions],
   ok = file:write_file(Filename,
                        list_to_binary(GridStrings)).
 
 solve_file(Filename, Seperator) ->
-  Solutions = solve_all(from_file(Filename, Seperator)),
+  Solutions = solve_all_return_dicts(from_file(Filename, Seperator)),
   OutFilename = [filename:basename(Filename, ".txt")
                  | ".out"],
   ok = to_file(OutFilename, Solutions),
