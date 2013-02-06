@@ -1,12 +1,11 @@
 {application, sudoku,
  [
-  {description, ""},
-  {vsn, "1"},
+  {description, "An Erlang implementation of Norvig's Sudoku solver"},
+  {vsn, "0.9.0"},
   {registered, []},
   {applications, [
                   kernel,
                   stdlib
                  ]},
-  {mod, { sudoku_app, []}},
   {env, []}
  ]}.
