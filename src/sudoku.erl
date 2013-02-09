@@ -1,7 +1,9 @@
 -module(sudoku).
 
 -export([solve_all/1,
+         solve_file/1,
          solve_file/2,
+         solve_binary_string/1,
          print_results/1]).
 
 -export([test/0]).
@@ -15,6 +17,26 @@
 solve_all(GridList) ->
   SolutionDicts = solve_all_return_dicts(GridList),
   [to_string(S) || S <- SolutionDicts].
+
+solve_file(Filename) ->
+  solve_file(Filename, "\n").
+
+solve_file(Filename, Seperator) ->
+  {ok, BinString} = file:read_file(Filename),
+  Solutions = solve_binary_string_return_dicts(BinString, Seperator),
+  OutFilename = [filename:basename(Filename, ".txt")
+                 | ".out"],
+  ok = to_file(OutFilename, Solutions),
+  Solutions.
+
+solve_binary_string(BinString) ->
+  SolutionDicts = solve_binary_string_return_dicts(BinString, "\n"),
+  [to_string(S) || S <- SolutionDicts].
+
+solve_binary_string_return_dicts(BinString, Seperator) ->
+  PuzzleGridList = string:tokens(binary_to_list(BinString), Seperator),
+  SolutionDicts = solve_all_return_dicts(PuzzleGridList),
+  SolutionDicts.
 
 print_results(Filename) ->
   print_results(Filename, "\n").
@@ -259,21 +281,10 @@ to_string(Puzzle) ->
   lists:flatmap(Fun,
                 lists:sort(dict:to_list(ValuesDict))).
 
-from_file(Filename, Seperator) ->
-  {ok, BinData} = file:read_file(Filename),
-  string:tokens(binary_to_list(BinData), Seperator).
-
 to_file(Filename, Solutions) ->
   GridStrings = [to_string(S) ++ "\n" || S <- Solutions],
   ok = file:write_file(Filename,
                        list_to_binary(GridStrings)).
-
-solve_file(Filename, Seperator) ->
-  Solutions = solve_all_return_dicts(from_file(Filename, Seperator)),
-  OutFilename = [filename:basename(Filename, ".txt")
-                 | ".out"],
-  ok = to_file(OutFilename, Solutions),
-  Solutions.
 
 exclude_from(Values, Digit) ->
   lists:delete(Digit, Values).
